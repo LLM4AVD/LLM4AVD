@@ -1,0 +1,2328 @@
+[
+    {
+        "Project": "JeecgBoot",
+        "location": "SysDataSourceController.java:queryById",
+        "Operation Description": "Retrieving a SysDataSource object by its ID and decrypting its password if it exists.",
+        "Relevant Code Snippet": "SysDataSource sysDataSource = sysDataSourceService.getById(id);",
+        "Object": "sysDataSource",
+        "Object Description": "The SysDataSource object retrieved from the service using the provided ID.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only authorized users can retrieve the list of data sources, enforcing access control through specific permission annotations.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysDataSourceController.java:queryPageList",
+                        "Operation Description": "Retrieving a paginated list of data sources based on the provided filters and pagination parameters.",
+                        "Relevant Code Snippet": "IPage<SysDataSource> pageList = sysDataSourceService.page(page, queryWrapper);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the list of data sources.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the queryPageList method, which ensures that the user has the necessary permissions to perform the read operation on SysDataSource.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:datasource:list\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the 'system:datasource:list' permission before allowing access to the queryPageList method."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "Booklore",
+        "location": "FileMoveController.java:moveFiles",
+        "Operation Description": "Moving a file from its current location to a new location based on the target library and path.",
+        "Relevant Code Snippet": "fileMoveHelper.moveFile(currentFilePath, newFilePath);",
+        "Object": "file",
+        "Object Description": "The file being moved from its current path to a new path.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only authorized users, either admins or those with upload permissions, can upload files to the system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "FileUploadController.java:uploadFile",
+                        "Operation Description": "Transferring the uploaded file to the temporary file location.",
+                        "Relevant Code Snippet": "file.transferTo(tempPath);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to upload files or admin access.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the uploadFile method, which ensures that the user has the necessary permissions to perform the upload operation.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"@securityUtil.isAdmin() or @securityUtil.canUpload()\")",
+                            "Detailed Code Snippet": "public ResponseEntity<?> uploadFile(...) { ... }"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "Booklore",
+        "location": "BookMediaController.java:getCbxPage",
+        "Operation Description": "Listing image files from the directory corresponding to the book ID to find the specific page image.",
+        "Relevant Code Snippet": "List<Path> images; try (Stream<Path> files = Files.list(bookDir)) { images = files.filter(p -> isImageFile(p.getFileName().toString())).sorted(Comparator.comparing(p -> p.getFileName().toString())).toList(); }",
+        "Object": "bookDir",
+        "Object Description": "The directory path where the images for the book are stored, derived from the book ID.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only users with admin rights or specific library manipulation permissions can access book reviews.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "BookReviewController.java:listByBook",
+                        "Operation Description": "Retrieving a list of book reviews associated with a specific book ID.",
+                        "Relevant Code Snippet": "List<BookReview> reviews = bookReviewService.getByBookId(bookId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user can manipulate the library or is an admin.",
+                            "Details": "The permission check is enforced by evaluating the current user's permissions to determine if they are an admin or have the 'CanManipulateLibrary' permission before allowing the retrieval of book reviews.",
+                            "Relevant Code Snippet": "boolean hasPermission = currentUser.getPermissions().isAdmin() || currentUser.getPermissions().isCanManipulateLibrary();",
+                            "Detailed Code Snippet": "public List<BookReview> getByBookId(Long bookId) {\n    BookLoreUser currentUser = authenticationService.getAuthenticatedUser();\n    boolean hasPermission = currentUser.getPermissions().isAdmin() || currentUser.getPermissions().isCanManipulateLibrary();\n    // Further logic follows..."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "Booklore",
+        "location": "BookController.java:getBooksByIds",
+        "Operation Description": "Retrieving multiple books by their IDs, optionally including descriptions.",
+        "Relevant Code Snippet": "return ResponseEntity.ok(bookService.getBooksByIds(ids, withDescription));",
+        "Object": "books",
+        "Object Description": "A list of Book objects retrieved based on the provided set of IDs.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the necessary access rights to specific libraries and books before allowing retrieval of related resources.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "LibraryController.java:getBooks",
+                        "Operation Description": "Retrieving all books associated with a specific library.",
+                        "Relevant Code Snippet": "List<Book> books = libraryService.getBooks(libraryId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the library specified by libraryId.",
+                            "Details": "The permission check is enforced by the @CheckLibraryAccess annotation, which ensures that the user has the necessary permissions to access the library before retrieving the book.",
+                            "Relevant Code Snippet": "@CheckLibraryAccess(libraryIdParam = \"libraryId\")",
+                            "Detailed Code Snippet": "The implementation of the @CheckLibraryAccess annotation would typically involve checking the user's permissions against the libraryId provided in the request."
+                        }
+                    },
+                    {
+                        "location": "BookController.java:getBookViewerSettings",
+                        "Operation Description": "Retrieving viewer settings for a specific book based on the provided book ID.",
+                        "Relevant Code Snippet": "return ResponseEntity.ok(bookService.getBookViewerSetting(bookId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the book entity.",
+                            "Details": "The permission check is enforced by the @CheckBookAccess annotation, which ensures that the user has the necessary permissions to access the book resource identified by bookId.",
+                            "Relevant Code Snippet": "@CheckBookAccess(bookIdParam = \"bookId\")",
+                            "Detailed Code Snippet": "None"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "Booklore",
+        "location": "BookController.java:addBookToShelf",
+        "Operation Description": "Assigning or unassigning books to/from shelves based on the provided request.",
+        "Relevant Code Snippet": "bookService.assignShelvesToBooks(request.getBookIds(), request.getShelvesToAssign(), request.getShelvesToUnassign());",
+        "Object": "book",
+        "Object Description": "The books whose shelf assignments are being modified, identified by their IDs provided in the request.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only users with metadata edit rights or admin privileges can update book entity metadata.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "BookReviewController.java:refreshReviews",
+                        "Operation Description": "Saving the updated book entity again after adding fresh reviews.",
+                        "Relevant Code Snippet": "bookRepository.save(bookEntity);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to edit metadata or admin access.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation, which ensures that the user has either metadata edit permission or is an admin before allowing the metadata update operation.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"@securityUtil.canEditMetadata() or @securityUtil.isAdmin()\")",
+                            "Detailed Code Snippet": "None"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "Ensures users have access to specific book resources before allowing updates to viewer settings.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "BookController.java:updateBookViewerSettings",
+                        "Operation Description": "Updating the viewer settings for a specific book identified by its ID.",
+                        "Relevant Code Snippet": "bookService.updateBookViewerSetting(bookId, bookViewerSettings);",
+                        "Permission Requirements": {
+                            "Description": "Requires access to the specific book resource.",
+                            "Details": "The permission check is enforced by the @CheckBookAccess annotation in the uploadCoverFromFile method, which ensures that the user has access to the book identified by bookId.",
+                            "Relevant Code Snippet": "@CheckBookAccess(bookIdParam = \"bookId\")",
+                            "Detailed Code Snippet": "None"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "NewsController.java:category",
+        "Operation Description": "Retrieving a list of articles associated with the specified category.",
+        "Relevant Code Snippet": "List<CmsArticle> articles = cmsArticleService.selectCmsArticlesByCategoryId(category.getCategoryId(), (page - 1) * rows, rows);",
+        "Object": "articles",
+        "Object Description": "A list of CmsArticle objects retrieved based on the category ID.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "NewsController.java:tag",
+        "Operation Description": "Retrieving a list of articles associated with the specified tag ID.",
+        "Relevant Code Snippet": "List<CmsArticle> articles = cmsArticleService.selectCmsArticlesByTagId(tag.getTagId(), (page - 1) * rows, rows);",
+        "Object": "articles",
+        "Object Description": "A list of CmsArticle objects retrieved based on the tag ID.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "NewsController.java:article",
+        "Operation Description": "Retrieving the article from the database using its primary key.",
+        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(articleId);",
+        "Object": "article",
+        "Object Description": "The CmsArticle object retrieved from the database based on the provided articleId.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "QaController.java:category",
+        "Operation Description": "Retrieving a list of articles associated with the specified category ID.",
+        "Relevant Code Snippet": "List<CmsArticle> articles = cmsArticleService.selectCmsArticlesByCategoryId(category.getCategoryId(), (page - 1) * rows, rows);",
+        "Object": "articles",
+        "Object Description": "The list of articles retrieved based on the category ID.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "QaController.java:tag",
+        "Operation Description": "Retrieving a list of articles associated with a specific tag identified by tagId.",
+        "Relevant Code Snippet": "List<CmsArticle> articles = cmsArticleService.selectCmsArticlesByTagId(tag.getTagId(), (page - 1) * rows, rows);",
+        "Object": "articles",
+        "Object Description": "A list of CmsArticle objects retrieved based on the tagId.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "QaController.java:question",
+        "Operation Description": "Retrieving the CmsArticle by its primary key using the articleId.",
+        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(articleId);",
+        "Object": "article",
+        "Object Description": "The CmsArticle object retrieved from the database using the articleId.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "BlogController.java:category",
+        "Operation Description": "Retrieving a list of articles associated with the specified category ID.",
+        "Relevant Code Snippet": "List<CmsArticle> articles = cmsArticleService.selectCmsArticlesByCategoryId(category.getCategoryId(), (page - 1) * rows, rows);",
+        "Object": "articles",
+        "Object Description": "A list of articles retrieved from the database that belong to the specified category.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "BlogController.java:tag",
+        "Operation Description": "Retrieving a list of articles associated with a specific tag identified by tagId.",
+        "Relevant Code Snippet": "List<CmsArticle> articles = cmsArticleService.selectCmsArticlesByTagId(tag.getTagId(), (page - 1) * rows, rows);",
+        "Object": "articles",
+        "Object Description": "A list of CmsArticle objects retrieved based on the tagId.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "zheng",
+        "location": "BlogController.java:details",
+        "Operation Description": "Retrieving the article details based on the provided articleId.",
+        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(articleId);",
+        "Object": "article",
+        "Object Description": "The CmsArticle instance retrieved from the database.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to read and update articles in the CMS system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "CmsArticleController.java:list",
+                        "Operation Description": "Retrieving a paginated list of articles based on sorting criteria.",
+                        "Relevant Code Snippet": "List<CmsArticle> rows = cmsArticleService.selectByExampleForOffsetPage(cmsArticleExample, offset, limit);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read articles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation on the list method, which ensures that the user has the necessary permissions to perform the read operation on CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:read\")",
+                            "Detailed Code Snippet": "public Object list(...) { ... }"
+                        }
+                    },
+                    {
+                        "location": "CmsArticleController.java:update",
+                        "Operation Description": "Retrieving the article details using its primary key.",
+                        "Relevant Code Snippet": "CmsArticle article = cmsArticleService.selectByPrimaryKey(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read the article details.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the update method, which ensures that the user has the necessary permissions to perform the read operation on the CmsArticle.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"cms:article:update\")",
+                            "Detailed Code Snippet": "The specific implementation of the permission check is not provided in the snippet, but it typically involves checking the user's permissions against the specified permission string."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "Oneblog",
+        "location": "RenderController.java:updateLog",
+        "Operation Description": "Retrieving all update records to display in the update log.",
+        "Relevant Code Snippet": "model.addAttribute(\"list\", updateRecordeService.listAll());",
+        "Object": "updateRecorde",
+        "Object Description": "The collection of all update records retrieved for display.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only authorized users can access and retrieve the list of SysUpdateRecorde based on specific permissions.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "RestUpdateController.java:list",
+                        "Operation Description": "Retrieving a paginated list of SysUpdateRecorde based on the provided conditions.",
+                        "Relevant Code Snippet": "PageInfo<UpdateRecorde> pageInfo = updateRecordeService.findPageBreakByCondition(vo);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the list of SysUpdateRecorde.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation, which ensures that the user has the necessary permissions to perform the find operation on SysUpdateRecorde.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"updateLogs\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the 'updateLogs' permission before allowing access to the list method."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "maku",
+        "location": "SysMailConfigController.java:send",
+        "Operation Description": "Retrieving the SysMailConfig entity by its ID from the request object.",
+        "Relevant Code Snippet": "SysMailConfigEntity entity = sysMailConfigService.getById(vo.getId());",
+        "Object": "entity",
+        "Object Description": "The SysMailConfigEntity object retrieved from the database using the ID provided in the request.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only authorized users can retrieve the SysMailConfig entity based on their specific permissions.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysMailConfigController.java:get",
+                        "Operation Description": "Retrieving the SysMailConfig entity by its ID.",
+                        "Relevant Code Snippet": "SysMailConfigEntity entity = sysMailConfigService.getById(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the SysMailConfig page.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the calling method, which ensures that the user has the necessary permissions to perform the read operation on SysMailConfig.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('sys:mail:config')\")",
+                            "Detailed Code Snippet": "The @PreAuthorize annotation checks if the current user has the authority 'sys:mail:config' before allowing access to the page method."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "maku",
+        "location": "SysUserController.java:nameList",
+        "Operation Description": "Retrieving the real names of users based on a list of user IDs.",
+        "Relevant Code Snippet": "List<String> list = sysUserService.getRealNameList(idList);",
+        "Object": "idList",
+        "Object Description": "A list of user IDs for which the real names are being retrieved.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures that users have the appropriate authority to access or retrieve user information and lists, enforcing access control through annotations.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:get",
+                        "Operation Description": "Retrieving user information by user ID.",
+                        "Relevant Code Snippet": "SysUserEntity entity = sysUserService.getById(id);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user information.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the get method, which ensures that the user has the necessary authority to retrieve user information.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('sys:user:info')\")",
+                            "Detailed Code Snippet": "None"
+                        }
+                    },
+                    {
+                        "location": "SysUserController.java:export",
+                        "Operation Description": "Retrieving a list of non-super admin users from the database.",
+                        "Relevant Code Snippet": "List<SysUserEntity> list = list(Wrappers.lambdaQuery(SysUserEntity.class).eq(SysUserEntity::getSuperAdmin, SuperAdminEnum.NO.getValue()));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to read user information.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the export method, which ensures that the user has the necessary permissions to perform the read operation on users.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('sys:user:export')\")",
+                            "Detailed Code Snippet": "None"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "maku",
+        "location": "SysUserController.java:loginInfo",
+        "Operation Description": "Updating the login information of the user, including real name, mobile, email, and gender.",
+        "Relevant Code Snippet": "sysUserService.updateLoginInfo(vo);",
+        "Object": "SysUserEntity",
+        "Object Description": "The user entity that is being updated with new login information.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate authorities to update user information and modify user properties before executing related operations.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:update",
+                        "Operation Description": "Updating the user's cached permissions in the system.",
+                        "Relevant Code Snippet": "sysUserTokenService.updateCacheAuthByUserId(entity.getId());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to update user information.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the update method, which ensures that the user has the necessary permissions to perform the update operation on the user.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('sys:user:update')\")",
+                            "Detailed Code Snippet": "The @PreAuthorize annotation checks if the current user has the 'sys:user:update' authority before allowing the execution of the update method."
+                        }
+                    },
+                    {
+                        "location": "UserOnlineController.java:page",
+                        "Operation Description": "Setting email in the UserOnlineVO object.",
+                        "Relevant Code Snippet": "userOnlineVO.setEmail(user.getEmail());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to modify user properties.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the page method, which ensures that the user has the necessary permissions to modify user properties.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('monitor:user:all')\")",
+                            "Detailed Code Snippet": "The @PreAuthorize annotation checks if the current user has the authority 'monitor:user:all' before allowing access to the page method."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "maku",
+        "location": "SendMessageController.java:send",
+        "Operation Description": "Updating the message content with the current user's name and avatar.",
+        "Relevant Code Snippet": "messageVO.setName(user.getRealName());\nmessageVO.setAvatar(user.getAvatar());",
+        "Object": "messageVO",
+        "Object Description": "The message object being populated with the current user's details.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate authorities to update user information and modify user properties before executing related operations.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:update",
+                        "Operation Description": "Updating the user's cached permissions in the system.",
+                        "Relevant Code Snippet": "sysUserTokenService.updateCacheAuthByUserId(entity.getId());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to update user information.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the update method, which ensures that the user has the necessary permissions to perform the update operation on the user.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('sys:user:update')\")",
+                            "Detailed Code Snippet": "The @PreAuthorize annotation checks if the current user has the 'sys:user:update' authority before allowing the execution of the update method."
+                        }
+                    },
+                    {
+                        "location": "UserOnlineController.java:page",
+                        "Operation Description": "Setting email in the UserOnlineVO object.",
+                        "Relevant Code Snippet": "userOnlineVO.setEmail(user.getEmail());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to modify user properties.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the page method, which ensures that the user has the necessary permissions to modify user properties.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('monitor:user:all')\")",
+                            "Detailed Code Snippet": "The @PreAuthorize annotation checks if the current user has the authority 'monitor:user:all' before allowing access to the page method."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "RuoYi",
+        "location": "SysRoleController.java:authDataScope",
+        "Operation Description": "Retrieving a SysRole object by its ID.",
+        "Relevant Code Snippet": "mmap.put(\"role\", roleService.selectRoleById(roleId));",
+        "Object": "SysRole",
+        "Object Description": "The SysRole object retrieved by its ID.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to list and export role data within the system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Fetching a list of roles in the list function.",
+                        "Relevant Code Snippet": "List<SysRole> list = roleService.selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to list roles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the list method, which ensures that the user has the necessary permissions to perform the list operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:list\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the permission 'system:role:list' before allowing access to the list method."
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Fetching a list of roles in the export function.",
+                        "Relevant Code Snippet": "List<SysRole> list = roleService.selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to export the role list.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the export operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:export\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the permission 'system:role:export' before allowing access to export the list of roles."
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users can only access roles and role data relevant to their department and permissions, preventing unauthorized access.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleAll",
+                        "Operation Description": "Getting all roles and marking those that belong to the user.",
+                        "Relevant Code Snippet": "List<SysRole> roles = selectRoleAll();",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to select roles.",
+                            "Details": "The permission check is enforced by the @DataScope annotation in the selectRoleList method, which ensures that the user can only access roles that they are permitted to see based on their department.",
+                            "Relevant Code Snippet": "@DataScope(deptAlias = \"d\")",
+                            "Detailed Code Snippet": "The @DataScope annotation modifies the query to include a filter based on the user's department, ensuring that only roles associated with the user's department are returned."
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:edit",
+                        "Operation Description": "Retrieving the role information by role ID.",
+                        "Relevant Code Snippet": "mmap.put(\"role\", roleService.selectRoleById(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user has access to the role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user is not an admin and has access to the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(roleId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:authDataScopeSave",
+                        "Operation Description": "Retrieving the list of roles associated with the given role ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user has access to the roles associated with the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(role.getRoleId());",
+                            "Detailed Code Snippet": "public void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to access and manage role-related information and associations within the system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:insertAuthUsers",
+                        "Operation Description": "Retrieving all authorized users for a specific role.",
+                        "Relevant Code Snippet": "return toAjax(roleService.insertAuthUsers(roleId, userIds));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view the role information.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the authUser method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:edit\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the user has the 'system:role:edit' permission before allowing access to the authUser method."
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRolesByUserId",
+                        "Operation Description": "Retrieving a list of roles associated with a specific user by user ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = roleService.selectRolesByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to retrieve roles associated with a user.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:edit\")",
+                            "Detailed Code Snippet": "public String edit(@PathVariable(\"userId\") Long userId, ModelMap mmap) { ... }"
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRolesByUserId",
+                        "Operation Description": "Retrieving a list of roles associated with a specific user by user ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = roleService.selectRolesByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to retrieve roles associated with a user.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:authRole\")",
+                            "Detailed Code Snippet": "public String authRole(@PathVariable(\"userId\") Long userId, ModelMap mmap) { ... }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only authorized users, particularly admins, can access and manage user data based on specific user IDs.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Selecting posts by userId in SysPostServiceImpl.",
+                        "Relevant Code Snippet": "List<SysPost> userPosts = postMapper.selectPostsByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is allowed to access roles associated with the userId.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with the appropriate permissions can access the roles of the specified user.",
+                            "Relevant Code Snippet": "userService.checkUserDataScope(userId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkUserDataScope(Long userId) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        SysUser user = new SysUser();\n        user.setUserId(userId);\n        List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n        if (StringUtils.isEmpty(users)) {\n            throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Checking role data scope by retrieving roles based on role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on user ID.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with admin privileges can access user data. If the user is not an admin, it checks if the user ID is valid and throws an exception if the user does not have permission.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()))",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysUserController.java:insertAuthRole",
+                        "Operation Description": "Checking if the roles have the necessary data scope for the specified role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on the user's role.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which verifies if the current user is an admin. If not, it checks if the user data associated with the provided userId exists. If it does not exist, a ServiceException is thrown.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) { ... }",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only users with admin privileges can access or modify certain roles and menus.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Checking if the user is an admin to filter roles accordingly.",
+                        "Relevant Code Snippet": "SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is an admin.",
+                            "Details": "The isAdmin method checks if the current user has admin privileges, which affects the filtering of roles.",
+                            "Relevant Code Snippet": "SysUser.isAdmin(userId)",
+                            "Detailed Code Snippet": "public boolean isAdmin() {\n    return isAdmin(this.userId);\n}"
+                        }
+                    },
+                    {
+                        "location": "SysMenuServiceImpl.java:roleMenuTreeData",
+                        "Operation Description": "Retrieving all menus for a specific user.",
+                        "Relevant Code Snippet": "List<SysMenu> menuList = selectMenuAll(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access all menus for the user.",
+                            "Details": "The permission check is enforced by the SysUser.isAdmin(userId) method, which determines if the user is an admin. If the user is an admin, they can access all menus; otherwise, they can only access menus associated with their user ID.",
+                            "Relevant Code Snippet": "if (SysUser.isAdmin(userId))",
+                            "Detailed Code Snippet": "public static boolean isAdmin(Long userId) {\n    // Logic to check if the user is an admin\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures users can only access department data if they have the appropriate permissions, preventing unauthorized access to sensitive information.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:addSave",
+                        "Operation Description": "Selecting a list of departments based on the department ID.",
+                        "Relevant Code Snippet": "List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access department data.",
+                            "Details": "The checkDeptDataScope method checks if the user has access to the department data. If the user is not an admin and the department ID is not null, it checks if the department exists.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId))",
+                            "Detailed Code Snippet": "public void checkDeptDataScope(Long deptId) { if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId)) { SysDept dept = new SysDept(); dept.setDeptId(deptId); List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept); if (StringUtils.isEmpty(depts)) { throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u90e8\u95e8\u6570\u636e\uff01\"); } } }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only non-admin roles can be deleted, enforcing access control based on role properties.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:deleteRoleByIds",
+                        "Operation Description": "Checking if the role is allowed to be deleted based on its properties.",
+                        "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the role is allowed to be deleted.",
+                            "Details": "The permission check is enforced by the checkRoleAllowed function, which ensures that the role being deleted is not the admin role.",
+                            "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleAllowed(SysRole role){\n    if (StringUtils.isNotNull(role.getRoleId()) && role.isAdmin()){\n        throw new ServiceException(\"\u4e0d\u5141\u8bb8\u64cd\u4f5c\u8d85\u7ea7\u7ba1\u7406\u5458\u89d2\u8272\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only authorized users can access and retrieve user data and associated roles based on specific permissions.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserServiceImpl.java:selectUserRoleGroup",
+                        "Operation Description": "Retrieving roles associated with a specific user by user ID in the view function.",
+                        "Relevant Code Snippet": "mmap.put(\"roleGroup\", userService.selectUserRoleGroup(userId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view user data.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation, which ensures that the user has the necessary permissions to view the user data and associated roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:list\")",
+                            "Detailed Code Snippet": "The annotation checks if the current user has the 'system:user:list' permission before allowing access to the view function."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "RuoYi",
+        "location": "SysRoleController.java:authDataScope",
+        "Operation Description": "Selecting a SysRole from the database using its ID.",
+        "Relevant Code Snippet": "return roleMapper.selectRoleById(roleId);",
+        "Object": "SysRole",
+        "Object Description": "The SysRole object selected from the database.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to list and export role data within the system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Fetching a list of roles in the list function.",
+                        "Relevant Code Snippet": "List<SysRole> list = roleService.selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to list roles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the list method, which ensures that the user has the necessary permissions to perform the list operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:list\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the permission 'system:role:list' before allowing access to the list method."
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Fetching a list of roles in the export function.",
+                        "Relevant Code Snippet": "List<SysRole> list = roleService.selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to export the role list.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the export operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:export\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the permission 'system:role:export' before allowing access to export the list of roles."
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users can only access roles and role data relevant to their department and permissions, preventing unauthorized access.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleAll",
+                        "Operation Description": "Getting all roles and marking those that belong to the user.",
+                        "Relevant Code Snippet": "List<SysRole> roles = selectRoleAll();",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to select roles.",
+                            "Details": "The permission check is enforced by the @DataScope annotation in the selectRoleList method, which ensures that the user can only access roles that they are permitted to see based on their department.",
+                            "Relevant Code Snippet": "@DataScope(deptAlias = \"d\")",
+                            "Detailed Code Snippet": "The @DataScope annotation modifies the query to include a filter based on the user's department, ensuring that only roles associated with the user's department are returned."
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:edit",
+                        "Operation Description": "Retrieving the role information by role ID.",
+                        "Relevant Code Snippet": "mmap.put(\"role\", roleService.selectRoleById(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user has access to the role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user is not an admin and has access to the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(roleId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:authDataScopeSave",
+                        "Operation Description": "Retrieving the list of roles associated with the given role ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user has access to the roles associated with the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(role.getRoleId());",
+                            "Detailed Code Snippet": "public void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to access and manage role-related information and associations within the system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:insertAuthUsers",
+                        "Operation Description": "Retrieving all authorized users for a specific role.",
+                        "Relevant Code Snippet": "return toAjax(roleService.insertAuthUsers(roleId, userIds));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view the role information.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the authUser method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:edit\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the user has the 'system:role:edit' permission before allowing access to the authUser method."
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRolesByUserId",
+                        "Operation Description": "Retrieving a list of roles associated with a specific user by user ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = roleService.selectRolesByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to retrieve roles associated with a user.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:edit\")",
+                            "Detailed Code Snippet": "public String edit(@PathVariable(\"userId\") Long userId, ModelMap mmap) { ... }"
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRolesByUserId",
+                        "Operation Description": "Retrieving a list of roles associated with a specific user by user ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = roleService.selectRolesByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to retrieve roles associated with a user.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:authRole\")",
+                            "Detailed Code Snippet": "public String authRole(@PathVariable(\"userId\") Long userId, ModelMap mmap) { ... }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only authorized users, particularly admins, can access and manage user data based on specific user IDs.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Selecting posts by userId in SysPostServiceImpl.",
+                        "Relevant Code Snippet": "List<SysPost> userPosts = postMapper.selectPostsByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is allowed to access roles associated with the userId.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with the appropriate permissions can access the roles of the specified user.",
+                            "Relevant Code Snippet": "userService.checkUserDataScope(userId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkUserDataScope(Long userId) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        SysUser user = new SysUser();\n        user.setUserId(userId);\n        List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n        if (StringUtils.isEmpty(users)) {\n            throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Checking role data scope by retrieving roles based on role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on user ID.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with admin privileges can access user data. If the user is not an admin, it checks if the user ID is valid and throws an exception if the user does not have permission.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()))",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysUserController.java:insertAuthRole",
+                        "Operation Description": "Checking if the roles have the necessary data scope for the specified role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on the user's role.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which verifies if the current user is an admin. If not, it checks if the user data associated with the provided userId exists. If it does not exist, a ServiceException is thrown.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) { ... }",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only users with admin privileges can access or modify certain roles and menus.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Checking if the user is an admin to filter roles accordingly.",
+                        "Relevant Code Snippet": "SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is an admin.",
+                            "Details": "The isAdmin method checks if the current user has admin privileges, which affects the filtering of roles.",
+                            "Relevant Code Snippet": "SysUser.isAdmin(userId)",
+                            "Detailed Code Snippet": "public boolean isAdmin() {\n    return isAdmin(this.userId);\n}"
+                        }
+                    },
+                    {
+                        "location": "SysMenuServiceImpl.java:roleMenuTreeData",
+                        "Operation Description": "Retrieving all menus for a specific user.",
+                        "Relevant Code Snippet": "List<SysMenu> menuList = selectMenuAll(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access all menus for the user.",
+                            "Details": "The permission check is enforced by the SysUser.isAdmin(userId) method, which determines if the user is an admin. If the user is an admin, they can access all menus; otherwise, they can only access menus associated with their user ID.",
+                            "Relevant Code Snippet": "if (SysUser.isAdmin(userId))",
+                            "Detailed Code Snippet": "public static boolean isAdmin(Long userId) {\n    // Logic to check if the user is an admin\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures users can only access department data if they have the appropriate permissions, preventing unauthorized access to sensitive information.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:addSave",
+                        "Operation Description": "Selecting a list of departments based on the department ID.",
+                        "Relevant Code Snippet": "List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access department data.",
+                            "Details": "The checkDeptDataScope method checks if the user has access to the department data. If the user is not an admin and the department ID is not null, it checks if the department exists.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId))",
+                            "Detailed Code Snippet": "public void checkDeptDataScope(Long deptId) { if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId)) { SysDept dept = new SysDept(); dept.setDeptId(deptId); List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept); if (StringUtils.isEmpty(depts)) { throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u90e8\u95e8\u6570\u636e\uff01\"); } } }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only non-admin roles can be deleted, enforcing access control based on role properties.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:deleteRoleByIds",
+                        "Operation Description": "Checking if the role is allowed to be deleted based on its properties.",
+                        "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the role is allowed to be deleted.",
+                            "Details": "The permission check is enforced by the checkRoleAllowed function, which ensures that the role being deleted is not the admin role.",
+                            "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleAllowed(SysRole role){\n    if (StringUtils.isNotNull(role.getRoleId()) && role.isAdmin()){\n        throw new ServiceException(\"\u4e0d\u5141\u8bb8\u64cd\u4f5c\u8d85\u7ea7\u7ba1\u7406\u5458\u89d2\u8272\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only authorized users can access and retrieve user data and associated roles based on specific permissions.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserServiceImpl.java:selectUserRoleGroup",
+                        "Operation Description": "Retrieving roles associated with a specific user by user ID in the view function.",
+                        "Relevant Code Snippet": "mmap.put(\"roleGroup\", userService.selectUserRoleGroup(userId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view user data.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation, which ensures that the user has the necessary permissions to view the user data and associated roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:list\")",
+                            "Detailed Code Snippet": "The annotation checks if the current user has the 'system:user:list' permission before allowing access to the view function."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "RuoYi",
+        "location": "SysRoleController.java:authUser",
+        "Operation Description": "Retrieving a SysRole object by its ID.",
+        "Relevant Code Snippet": "mmap.put(\"role\", roleService.selectRoleById(roleId));",
+        "Object": "role",
+        "Object Description": "The SysRole object retrieved by its ID",
+        "Permission Requirements": [
+            {
+                "Description": "Requires permission to view the role information.",
+                "Details": "The permission check is enforced by the @RequiresPermissions annotation in the authUser method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                "Relevant Code Snippet": "@RequiresPermissions(\"system:role:edit\")",
+                "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the user has the 'system:role:edit' permission before allowing access to the authUser method."
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to list and export role data within the system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Fetching a list of roles in the list function.",
+                        "Relevant Code Snippet": "List<SysRole> list = roleService.selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to list roles.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the list method, which ensures that the user has the necessary permissions to perform the list operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:list\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the permission 'system:role:list' before allowing access to the list method."
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Fetching a list of roles in the export function.",
+                        "Relevant Code Snippet": "List<SysRole> list = roleService.selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to export the role list.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the export operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:export\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the permission 'system:role:export' before allowing access to export the list of roles."
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users can only access roles and role data relevant to their department and permissions, preventing unauthorized access.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleAll",
+                        "Operation Description": "Getting all roles and marking those that belong to the user.",
+                        "Relevant Code Snippet": "List<SysRole> roles = selectRoleAll();",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to select roles.",
+                            "Details": "The permission check is enforced by the @DataScope annotation in the selectRoleList method, which ensures that the user can only access roles that they are permitted to see based on their department.",
+                            "Relevant Code Snippet": "@DataScope(deptAlias = \"d\")",
+                            "Detailed Code Snippet": "The @DataScope annotation modifies the query to include a filter based on the user's department, ensuring that only roles associated with the user's department are returned."
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:edit",
+                        "Operation Description": "Retrieving the role information by role ID.",
+                        "Relevant Code Snippet": "mmap.put(\"role\", roleService.selectRoleById(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user has access to the role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user is not an admin and has access to the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(roleId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:authDataScopeSave",
+                        "Operation Description": "Retrieving the list of roles associated with the given role ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user has access to the roles associated with the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(role.getRoleId());",
+                            "Detailed Code Snippet": "public void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only authorized users, particularly admins, can access and manage user data based on specific user IDs.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Selecting posts by userId in SysPostServiceImpl.",
+                        "Relevant Code Snippet": "List<SysPost> userPosts = postMapper.selectPostsByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is allowed to access roles associated with the userId.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with the appropriate permissions can access the roles of the specified user.",
+                            "Relevant Code Snippet": "userService.checkUserDataScope(userId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkUserDataScope(Long userId) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        SysUser user = new SysUser();\n        user.setUserId(userId);\n        List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n        if (StringUtils.isEmpty(users)) {\n            throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Checking role data scope by retrieving roles based on role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on user ID.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with admin privileges can access user data. If the user is not an admin, it checks if the user ID is valid and throws an exception if the user does not have permission.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()))",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysUserController.java:insertAuthRole",
+                        "Operation Description": "Checking if the roles have the necessary data scope for the specified role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on the user's role.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which verifies if the current user is an admin. If not, it checks if the user data associated with the provided userId exists. If it does not exist, a ServiceException is thrown.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) { ... }",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only users with admin privileges can access or modify certain roles and menus.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Checking if the user is an admin to filter roles accordingly.",
+                        "Relevant Code Snippet": "SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is an admin.",
+                            "Details": "The isAdmin method checks if the current user has admin privileges, which affects the filtering of roles.",
+                            "Relevant Code Snippet": "SysUser.isAdmin(userId)",
+                            "Detailed Code Snippet": "public boolean isAdmin() {\n    return isAdmin(this.userId);\n}"
+                        }
+                    },
+                    {
+                        "location": "SysMenuServiceImpl.java:roleMenuTreeData",
+                        "Operation Description": "Retrieving all menus for a specific user.",
+                        "Relevant Code Snippet": "List<SysMenu> menuList = selectMenuAll(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access all menus for the user.",
+                            "Details": "The permission check is enforced by the SysUser.isAdmin(userId) method, which determines if the user is an admin. If the user is an admin, they can access all menus; otherwise, they can only access menus associated with their user ID.",
+                            "Relevant Code Snippet": "if (SysUser.isAdmin(userId))",
+                            "Detailed Code Snippet": "public static boolean isAdmin(Long userId) {\n    // Logic to check if the user is an admin\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures users can only access department data if they have the appropriate permissions, preventing unauthorized access to sensitive information.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:addSave",
+                        "Operation Description": "Selecting a list of departments based on the department ID.",
+                        "Relevant Code Snippet": "List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access department data.",
+                            "Details": "The checkDeptDataScope method checks if the user has access to the department data. If the user is not an admin and the department ID is not null, it checks if the department exists.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId))",
+                            "Detailed Code Snippet": "public void checkDeptDataScope(Long deptId) { if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId)) { SysDept dept = new SysDept(); dept.setDeptId(deptId); List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept); if (StringUtils.isEmpty(depts)) { throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u90e8\u95e8\u6570\u636e\uff01\"); } } }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only non-admin roles can be deleted, enforcing access control based on role properties.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:deleteRoleByIds",
+                        "Operation Description": "Checking if the role is allowed to be deleted based on its properties.",
+                        "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the role is allowed to be deleted.",
+                            "Details": "The permission check is enforced by the checkRoleAllowed function, which ensures that the role being deleted is not the admin role.",
+                            "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleAllowed(SysRole role){\n    if (StringUtils.isNotNull(role.getRoleId()) && role.isAdmin()){\n        throw new ServiceException(\"\u4e0d\u5141\u8bb8\u64cd\u4f5c\u8d85\u7ea7\u7ba1\u7406\u5458\u89d2\u8272\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only authorized users can access and retrieve user data and associated roles based on specific permissions.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserServiceImpl.java:selectUserRoleGroup",
+                        "Operation Description": "Retrieving roles associated with a specific user by user ID in the view function.",
+                        "Relevant Code Snippet": "mmap.put(\"roleGroup\", userService.selectUserRoleGroup(userId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view user data.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation, which ensures that the user has the necessary permissions to view the user data and associated roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:list\")",
+                            "Detailed Code Snippet": "The annotation checks if the current user has the 'system:user:list' permission before allowing access to the view function."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "RuoYi",
+        "location": "SysRoleController.java:list",
+        "Operation Description": "Retrieving a list of roles based on the provided SysRole criteria.",
+        "Relevant Code Snippet": "List<SysRole> list = roleService.selectRoleList(role);",
+        "Object": "list",
+        "Object Description": "A list of SysRole objects retrieved from the database.",
+        "Permission Requirements": [
+            {
+                "Description": "Requires permission to list roles.",
+                "Details": "The permission check is enforced by the @RequiresPermissions annotation in the list method, which ensures that the user has the necessary permissions to perform the list operation on roles.",
+                "Relevant Code Snippet": "@RequiresPermissions(\"system:role:list\")",
+                "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the current user has the permission 'system:role:list' before allowing access to the list method."
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures users can only access roles and role data relevant to their department and permissions, preventing unauthorized access.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleAll",
+                        "Operation Description": "Getting all roles and marking those that belong to the user.",
+                        "Relevant Code Snippet": "List<SysRole> roles = selectRoleAll();",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to select roles.",
+                            "Details": "The permission check is enforced by the @DataScope annotation in the selectRoleList method, which ensures that the user can only access roles that they are permitted to see based on their department.",
+                            "Relevant Code Snippet": "@DataScope(deptAlias = \"d\")",
+                            "Detailed Code Snippet": "The @DataScope annotation modifies the query to include a filter based on the user's department, ensuring that only roles associated with the user's department are returned."
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:edit",
+                        "Operation Description": "Retrieving the role information by role ID.",
+                        "Relevant Code Snippet": "mmap.put(\"role\", roleService.selectRoleById(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user has access to the role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user is not an admin and has access to the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(roleId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:authDataScopeSave",
+                        "Operation Description": "Retrieving the list of roles associated with the given role ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access role data.",
+                            "Details": "The permission check is enforced by the checkRoleDataScope method, which ensures that the user has access to the roles associated with the specified role ID.",
+                            "Relevant Code Snippet": "roleService.checkRoleDataScope(role.getRoleId());",
+                            "Detailed Code Snippet": "public void checkRoleDataScope(Long... roleIds) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        for (Long roleId : roleIds) {\n            SysRole role = new SysRole();\n            role.setRoleId(roleId);\n            List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);\n            if (StringUtils.isEmpty(roles)) {\n                throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u89d2\u8272\u6570\u636e\uff01\");\n            }\n        }\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users have the appropriate permissions to access and manage role-related information and associations within the system.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:insertAuthUsers",
+                        "Operation Description": "Retrieving all authorized users for a specific role.",
+                        "Relevant Code Snippet": "return toAjax(roleService.insertAuthUsers(roleId, userIds));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view the role information.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the authUser method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:role:edit\")",
+                            "Detailed Code Snippet": "The @RequiresPermissions annotation checks if the user has the 'system:role:edit' permission before allowing access to the authUser method."
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRolesByUserId",
+                        "Operation Description": "Retrieving a list of roles associated with a specific user by user ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = roleService.selectRolesByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to retrieve roles associated with a user.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:edit\")",
+                            "Detailed Code Snippet": "public String edit(@PathVariable(\"userId\") Long userId, ModelMap mmap) { ... }"
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRolesByUserId",
+                        "Operation Description": "Retrieving a list of roles associated with a specific user by user ID.",
+                        "Relevant Code Snippet": "List<SysRole> roles = roleService.selectRolesByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to retrieve roles associated with a user.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation in the calling method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:authRole\")",
+                            "Detailed Code Snippet": "public String authRole(@PathVariable(\"userId\") Long userId, ModelMap mmap) { ... }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only authorized users, particularly admins, can access and manage user data based on specific user IDs.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Selecting posts by userId in SysPostServiceImpl.",
+                        "Relevant Code Snippet": "List<SysPost> userPosts = postMapper.selectPostsByUserId(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is allowed to access roles associated with the userId.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with the appropriate permissions can access the roles of the specified user.",
+                            "Relevant Code Snippet": "userService.checkUserDataScope(userId);",
+                            "Detailed Code Snippet": "@Override\npublic void checkUserDataScope(Long userId) {\n    if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n        SysUser user = new SysUser();\n        user.setUserId(userId);\n        List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n        if (StringUtils.isEmpty(users)) {\n            throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n        }\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleServiceImpl.java:selectRoleList",
+                        "Operation Description": "Checking role data scope by retrieving roles based on role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on user ID.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which ensures that only users with admin privileges can access user data. If the user is not an admin, it checks if the user ID is valid and throws an exception if the user does not have permission.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()))",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    },
+                    {
+                        "location": "SysUserController.java:insertAuthRole",
+                        "Operation Description": "Checking if the roles have the necessary data scope for the specified role IDs.",
+                        "Relevant Code Snippet": "List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access user data based on the user's role.",
+                            "Details": "The permission check is enforced by the checkUserDataScope method, which verifies if the current user is an admin. If not, it checks if the user data associated with the provided userId exists. If it does not exist, a ServiceException is thrown.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) { ... }",
+                            "Detailed Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId())) {\n    SysUser user = new SysUser();\n    user.setUserId(userId);\n    List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n    if (StringUtils.isEmpty(users)) {\n        throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u7528\u6237\u6570\u636e\uff01\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures that only users with admin privileges can access or modify certain roles and menus.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:edit",
+                        "Operation Description": "Checking if the user is an admin to filter roles accordingly.",
+                        "Relevant Code Snippet": "SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the user is an admin.",
+                            "Details": "The isAdmin method checks if the current user has admin privileges, which affects the filtering of roles.",
+                            "Relevant Code Snippet": "SysUser.isAdmin(userId)",
+                            "Detailed Code Snippet": "public boolean isAdmin() {\n    return isAdmin(this.userId);\n}"
+                        }
+                    },
+                    {
+                        "location": "SysMenuServiceImpl.java:roleMenuTreeData",
+                        "Operation Description": "Retrieving all menus for a specific user.",
+                        "Relevant Code Snippet": "List<SysMenu> menuList = selectMenuAll(userId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access all menus for the user.",
+                            "Details": "The permission check is enforced by the SysUser.isAdmin(userId) method, which determines if the user is an admin. If the user is an admin, they can access all menus; otherwise, they can only access menus associated with their user ID.",
+                            "Relevant Code Snippet": "if (SysUser.isAdmin(userId))",
+                            "Detailed Code Snippet": "public static boolean isAdmin(Long userId) {\n    // Logic to check if the user is an admin\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures users can only access department data if they have the appropriate permissions, preventing unauthorized access to sensitive information.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserController.java:addSave",
+                        "Operation Description": "Selecting a list of departments based on the department ID.",
+                        "Relevant Code Snippet": "List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access department data.",
+                            "Details": "The checkDeptDataScope method checks if the user has access to the department data. If the user is not an admin and the department ID is not null, it checks if the department exists.",
+                            "Relevant Code Snippet": "if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId))",
+                            "Detailed Code Snippet": "public void checkDeptDataScope(Long deptId) { if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId)) { SysDept dept = new SysDept(); dept.setDeptId(deptId); List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept); if (StringUtils.isEmpty(depts)) { throw new ServiceException(\"\u6ca1\u6709\u6743\u9650\u8bbf\u95ee\u90e8\u95e8\u6570\u636e\uff01\"); } } }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only non-admin roles can be deleted, enforcing access control based on role properties.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:deleteRoleByIds",
+                        "Operation Description": "Checking if the role is allowed to be deleted based on its properties.",
+                        "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the role is allowed to be deleted.",
+                            "Details": "The permission check is enforced by the checkRoleAllowed function, which ensures that the role being deleted is not the admin role.",
+                            "Relevant Code Snippet": "checkRoleAllowed(new SysRole(roleId));",
+                            "Detailed Code Snippet": "@Override\npublic void checkRoleAllowed(SysRole role){\n    if (StringUtils.isNotNull(role.getRoleId()) && role.isAdmin()){\n        throw new ServiceException(\"\u4e0d\u5141\u8bb8\u64cd\u4f5c\u8d85\u7ea7\u7ba1\u7406\u5458\u89d2\u8272\");\n    }\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only authorized users can access and retrieve user data and associated roles based on specific permissions.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysUserServiceImpl.java:selectUserRoleGroup",
+                        "Operation Description": "Retrieving roles associated with a specific user by user ID in the view function.",
+                        "Relevant Code Snippet": "mmap.put(\"roleGroup\", userService.selectUserRoleGroup(userId));",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view user data.",
+                            "Details": "The permission check is enforced by the @RequiresPermissions annotation, which ensures that the user has the necessary permissions to view the user data and associated roles.",
+                            "Relevant Code Snippet": "@RequiresPermissions(\"system:user:list\")",
+                            "Detailed Code Snippet": "The annotation checks if the current user has the 'system:user:list' permission before allowing access to the view function."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "youlai-mall",
+        "location": "SysUserController.java:importUsers",
+        "Operation Description": "Reading user data from an uploaded file and processing it for import.",
+        "Relevant Code Snippet": "EasyExcel.read(file.getInputStream(), UserImportVO.class, listener).sheet().doRead();",
+        "Object": "UserImportVO",
+        "Object Description": "The data transfer object that holds the user information extracted from the uploaded file.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bbf\u95ee\u5176\u8ba4\u8bc1\u4fe1\u606f\u7684\u6743\u9650\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access user authentication information.",
+                        "Details": "The permission check is enforced within the userService.getUserAuthInfo method, which retrieves user authentication information based on the username provided. If the user does not have the necessary permissions, the method may return null or throw an exception.",
+                        "Relevant Code Snippet": "if (userAuthInfo != null) {",
+                        "Detailed Code Snippet": "public UserAuthInfo getUserAuthInfo(String username) {\n        UserAuthInfo userAuthInfo = this.baseMapper.getUserAuthInfo(username);\n        if (userAuthInfo != null) {\n            Set<String> roles = userAuthInfo.getRoles();\n            if (CollectionUtil.isNotEmpty(roles)) {\n                Integer dataScope = roleService.getMaxDataRangeDataScope(roles);\n                userAuthInfo.setDataScope(dataScope);\n            }\n        }\n        return userAuthInfo;\n    }"
+                    },
+                    {
+                        "Description": "Requires permission to access user authentication information.",
+                        "Details": "The permission check is enforced within the userService.getUserAuthInfo method, which retrieves user authentication information based on the username provided. If the user does not have the necessary permissions, the method may return null or throw an exception.",
+                        "Relevant Code Snippet": "if (userAuthInfo != null) {",
+                        "Detailed Code Snippet": "public UserAuthInfo getUserAuthInfo(String username) {\n        UserAuthInfo userAuthInfo = this.baseMapper.getUserAuthInfo(username);\n        if (userAuthInfo != null) {\n            Set<String> roles = userAuthInfo.getRoles();\n            if (CollectionUtil.isNotEmpty(roles)) {\n                Integer dataScope = roleService.getMaxDataRangeDataScope(roles);\n                userAuthInfo.setDataScope(dataScope);\n            }\n        }\n        return userAuthInfo;\n    }"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u7ecf\u8fc7\u8eab\u4efd\u9a8c\u8bc1\u540e\u624d\u80fd\u8bbf\u95ee\u5176\u4e2a\u4eba\u4fe1\u606f\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access the current user's information.",
+                        "Details": "The permission check is implicitly enforced by the method that retrieves the current user's information based on the username. The method uses SecurityUtils.getUsername() to get the username of the currently logged-in user, which implies that the user must be authenticated to access their own information.",
+                        "Relevant Code Snippet": "this.getOne(new LambdaQueryWrapper<SysUser>()\n.eq(SysUser::getUsername, SecurityUtils.getUsername())",
+                        "Detailed Code Snippet": "SecurityUtils.getUsername() checks if the user is authenticated and retrieves the username."
+                    },
+                    {
+                        "Description": "Requires permission to access the current user's information.",
+                        "Details": "The permission check is enforced by the SecurityUtils.getUsername() method, which ensures that the user is authenticated and has the right to access their own information.",
+                        "Relevant Code Snippet": "SecurityUtils.getUsername()",
+                        "Detailed Code Snippet": "public static String getUsername() {\n    // Logic to retrieve the currently authenticated user's username\n    return SecurityContextHolder.getContext().getAuthentication().getName();\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u53ea\u80fd\u8bbf\u95ee\u81ea\u5df1\u7684\u4e2a\u4eba\u8d44\u6599\u4fe1\u606f\uff0c\u9a8c\u8bc1\u8eab\u4efd\u548c\u6388\u6743\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access user profile information.",
+                        "Details": "The permission check is enforced by retrieving the user ID from the security context, which ensures that the user is authenticated and authorized to access their own profile information.",
+                        "Relevant Code Snippet": "Long userId = SecurityUtils.getUserId();",
+                        "Detailed Code Snippet": "public Long getUserId() {\n    // Logic to retrieve the current user's ID from the security context\n    return currentUser.getId();\n}"
+                    },
+                    {
+                        "Description": "Requires permission to access user profile information.",
+                        "Details": "The permission check is enforced by retrieving the user ID from the security context, which ensures that the user is authenticated and authorized to access their own profile information.",
+                        "Relevant Code Snippet": "Long userId = SecurityUtils.getUserId();",
+                        "Detailed Code Snippet": "public Long getUserId() {\n    // Logic to retrieve the current user's ID from the security context\n    return currentUser.getId();\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bfb\u53d6\u7528\u6237\u6570\u636e\u548c\u8be6\u60c5\u7684\u6743\u9650\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read user data.",
+                        "Details": "The permission check is enforced by the @PreAuthorize annotation in the calling method, which ensures that the user has the necessary permissions to perform the read operation on user data.",
+                        "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('user:read')\")",
+                        "Detailed Code Snippet": "None"
+                    },
+                    {
+                        "Description": "Requires permission to read user details.",
+                        "Details": "The permission check is enforced by the controller method that calls getUserFormData, ensuring that the user has the necessary permissions to retrieve user details.",
+                        "Relevant Code Snippet": "@GetMapping(\"/{userId}/form\")",
+                        "Detailed Code Snippet": "@Operation(summary = \"\u7528\u6237\u8868\u5355\u6570\u636e\")\n@GetMapping(\"/{userId}/form\")\npublic Result<UserForm> getUserForm(\n        @Parameter(description = \"\u7528\u6237ID\") @PathVariable Long userId\n) {\n    UserForm formData = userService.getUserFormData(userId);\n    return Result.success(formData);\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u53ea\u80fd\u8bbf\u95ee\u81ea\u5df1\u7684\u4fe1\u606f\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read the current user's information.",
+                        "Details": "The permission check is implied through the use of SecurityUtils.getUsername(), which retrieves the username of the currently logged-in user. The system must ensure that the user has the right to access their own information.",
+                        "Relevant Code Snippet": "SecurityUtils.getUsername()",
+                        "Detailed Code Snippet": "None"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u9a8c\u8bc1\u7528\u6237\u6ce8\u518c\u4fe1\u606f\u7684\u6743\u9650\uff0c\u786e\u4fdd\u7528\u6237\u552f\u4e00\u6027\u548c\u6570\u636e\u5b89\u5168\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read user information to check for existing registrations.",
+                        "Details": "The permission check is enforced by counting existing users with the same mobile number or username, ensuring that the system can verify if a user is already registered.",
+                        "Relevant Code Snippet": "long count = this.count(new LambdaQueryWrapper<SysUser>()\n                .eq(SysUser::getMobile, mobile)\n                .or()\n                .eq(SysUser::getUsername, mobile)\n        );",
+                        "Detailed Code Snippet": "public long count(LambdaQueryWrapper<SysUser> queryWrapper) {\n    // Implementation that counts users based on the query criteria\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bbf\u95ee\u548c\u67e5\u8be2\u7528\u6237\u6570\u636e\u5e93\u7684\u6743\u9650",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access the user database.",
+                        "Details": "The permission check is enforced by the baseMapper.getUserPage method, which should include a check to ensure the user has the necessary permissions to query user data from the database.",
+                        "Relevant Code Snippet": "this.baseMapper.getUserPage(page, queryParams);",
+                        "Detailed Code Snippet": "public Page<UserBO> getUserPage(Page<UserBO> page, UserPageQuery queryParams) { /* permission check logic */ }"
+                    },
+                    {
+                        "Description": "Requires permission to access the user list.",
+                        "Details": "The permission check is enforced by the controller method that calls getUserPage, ensuring that the user has the necessary permissions to retrieve user data.",
+                        "Relevant Code Snippet": "@GetMapping(\"/page\")",
+                        "Detailed Code Snippet": "public PageResult<UserPageVO> getUserPage(@ParameterObject UserPageQuery queryParams) { IPage<UserPageVO> result = userService.getUserPage(queryParams); return PageResult.success(result); }"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "youlai-mall",
+        "location": "SysUserController.java:importUsers",
+        "Operation Description": "Reading user data from an uploaded file and processing it for import.",
+        "Relevant Code Snippet": "EasyExcel.read(file.getInputStream(), UserImportVO.class, listener).sheet().doRead();",
+        "Object": "UserImportVO",
+        "Object Description": "The data structure representing user information being imported from the file.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bbf\u95ee\u5176\u8ba4\u8bc1\u4fe1\u606f\u7684\u6743\u9650\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access user authentication information.",
+                        "Details": "The permission check is enforced within the userService.getUserAuthInfo method, which retrieves user authentication information based on the username provided. If the user does not have the necessary permissions, the method may return null or throw an exception.",
+                        "Relevant Code Snippet": "if (userAuthInfo != null) {",
+                        "Detailed Code Snippet": "public UserAuthInfo getUserAuthInfo(String username) {\n        UserAuthInfo userAuthInfo = this.baseMapper.getUserAuthInfo(username);\n        if (userAuthInfo != null) {\n            Set<String> roles = userAuthInfo.getRoles();\n            if (CollectionUtil.isNotEmpty(roles)) {\n                Integer dataScope = roleService.getMaxDataRangeDataScope(roles);\n                userAuthInfo.setDataScope(dataScope);\n            }\n        }\n        return userAuthInfo;\n    }"
+                    },
+                    {
+                        "Description": "Requires permission to access user authentication information.",
+                        "Details": "The permission check is enforced within the userService.getUserAuthInfo method, which retrieves user authentication information based on the username provided. If the user does not have the necessary permissions, the method may return null or throw an exception.",
+                        "Relevant Code Snippet": "if (userAuthInfo != null) {",
+                        "Detailed Code Snippet": "public UserAuthInfo getUserAuthInfo(String username) {\n        UserAuthInfo userAuthInfo = this.baseMapper.getUserAuthInfo(username);\n        if (userAuthInfo != null) {\n            Set<String> roles = userAuthInfo.getRoles();\n            if (CollectionUtil.isNotEmpty(roles)) {\n                Integer dataScope = roleService.getMaxDataRangeDataScope(roles);\n                userAuthInfo.setDataScope(dataScope);\n            }\n        }\n        return userAuthInfo;\n    }"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u7ecf\u8fc7\u8eab\u4efd\u9a8c\u8bc1\u540e\u624d\u80fd\u8bbf\u95ee\u5176\u4e2a\u4eba\u4fe1\u606f\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access the current user's information.",
+                        "Details": "The permission check is implicitly enforced by the method that retrieves the current user's information based on the username. The method uses SecurityUtils.getUsername() to get the username of the currently logged-in user, which implies that the user must be authenticated to access their own information.",
+                        "Relevant Code Snippet": "this.getOne(new LambdaQueryWrapper<SysUser>()\n.eq(SysUser::getUsername, SecurityUtils.getUsername())",
+                        "Detailed Code Snippet": "SecurityUtils.getUsername() checks if the user is authenticated and retrieves the username."
+                    },
+                    {
+                        "Description": "Requires permission to access the current user's information.",
+                        "Details": "The permission check is enforced by the SecurityUtils.getUsername() method, which ensures that the user is authenticated and has the right to access their own information.",
+                        "Relevant Code Snippet": "SecurityUtils.getUsername()",
+                        "Detailed Code Snippet": "public static String getUsername() {\n    // Logic to retrieve the currently authenticated user's username\n    return SecurityContextHolder.getContext().getAuthentication().getName();\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u53ea\u80fd\u8bbf\u95ee\u81ea\u5df1\u7684\u4e2a\u4eba\u8d44\u6599\u4fe1\u606f\uff0c\u9a8c\u8bc1\u8eab\u4efd\u548c\u6388\u6743\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access user profile information.",
+                        "Details": "The permission check is enforced by retrieving the user ID from the security context, which ensures that the user is authenticated and authorized to access their own profile information.",
+                        "Relevant Code Snippet": "Long userId = SecurityUtils.getUserId();",
+                        "Detailed Code Snippet": "public Long getUserId() {\n    // Logic to retrieve the current user's ID from the security context\n    return currentUser.getId();\n}"
+                    },
+                    {
+                        "Description": "Requires permission to access user profile information.",
+                        "Details": "The permission check is enforced by retrieving the user ID from the security context, which ensures that the user is authenticated and authorized to access their own profile information.",
+                        "Relevant Code Snippet": "Long userId = SecurityUtils.getUserId();",
+                        "Detailed Code Snippet": "public Long getUserId() {\n    // Logic to retrieve the current user's ID from the security context\n    return currentUser.getId();\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bfb\u53d6\u7528\u6237\u6570\u636e\u548c\u8be6\u60c5\u7684\u6743\u9650\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read user data.",
+                        "Details": "The permission check is enforced by the @PreAuthorize annotation in the calling method, which ensures that the user has the necessary permissions to perform the read operation on user data.",
+                        "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('user:read')\")",
+                        "Detailed Code Snippet": "None"
+                    },
+                    {
+                        "Description": "Requires permission to read user details.",
+                        "Details": "The permission check is enforced by the controller method that calls getUserFormData, ensuring that the user has the necessary permissions to retrieve user details.",
+                        "Relevant Code Snippet": "@GetMapping(\"/{userId}/form\")",
+                        "Detailed Code Snippet": "@Operation(summary = \"\u7528\u6237\u8868\u5355\u6570\u636e\")\n@GetMapping(\"/{userId}/form\")\npublic Result<UserForm> getUserForm(\n        @Parameter(description = \"\u7528\u6237ID\") @PathVariable Long userId\n) {\n    UserForm formData = userService.getUserFormData(userId);\n    return Result.success(formData);\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u53ea\u80fd\u8bbf\u95ee\u81ea\u5df1\u7684\u4fe1\u606f\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read the current user's information.",
+                        "Details": "The permission check is implied through the use of SecurityUtils.getUsername(), which retrieves the username of the currently logged-in user. The system must ensure that the user has the right to access their own information.",
+                        "Relevant Code Snippet": "SecurityUtils.getUsername()",
+                        "Detailed Code Snippet": "None"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u9a8c\u8bc1\u7528\u6237\u6ce8\u518c\u4fe1\u606f\u7684\u6743\u9650\uff0c\u786e\u4fdd\u7528\u6237\u552f\u4e00\u6027\u548c\u6570\u636e\u5b89\u5168\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read user information to check for existing registrations.",
+                        "Details": "The permission check is enforced by counting existing users with the same mobile number or username, ensuring that the system can verify if a user is already registered.",
+                        "Relevant Code Snippet": "long count = this.count(new LambdaQueryWrapper<SysUser>()\n                .eq(SysUser::getMobile, mobile)\n                .or()\n                .eq(SysUser::getUsername, mobile)\n        );",
+                        "Detailed Code Snippet": "public long count(LambdaQueryWrapper<SysUser> queryWrapper) {\n    // Implementation that counts users based on the query criteria\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bbf\u95ee\u548c\u67e5\u8be2\u7528\u6237\u6570\u636e\u5e93\u7684\u6743\u9650",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access the user database.",
+                        "Details": "The permission check is enforced by the baseMapper.getUserPage method, which should include a check to ensure the user has the necessary permissions to query user data from the database.",
+                        "Relevant Code Snippet": "this.baseMapper.getUserPage(page, queryParams);",
+                        "Detailed Code Snippet": "public Page<UserBO> getUserPage(Page<UserBO> page, UserPageQuery queryParams) { /* permission check logic */ }"
+                    },
+                    {
+                        "Description": "Requires permission to access the user list.",
+                        "Details": "The permission check is enforced by the controller method that calls getUserPage, ensuring that the user has the necessary permissions to retrieve user data.",
+                        "Relevant Code Snippet": "@GetMapping(\"/page\")",
+                        "Detailed Code Snippet": "public PageResult<UserPageVO> getUserPage(@ParameterObject UserPageQuery queryParams) { IPage<UserPageVO> result = userService.getUserPage(queryParams); return PageResult.success(result); }"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "youlai-mall",
+        "location": "SysRoleController.java:updateRoleStatus",
+        "Operation Description": "Retrieving the role by its ID to ensure it exists before updating.",
+        "Relevant Code Snippet": "SysRole role = this.getById(roleId);",
+        "Object": "role",
+        "Object Description": "The role object retrieved from the database",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This category of permission checks ensures that only non-root users can access role information, thereby enforcing access control to sensitive system roles.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:listRoleOptions",
+                        "Operation Description": "Retrieving a list of system roles excluding the root role and selecting specific fields.",
+                        "Relevant Code Snippet": "List<SysRole> roleList = this.list(new LambdaQueryWrapper<SysRole>()\n                .ne(!SecurityUtils.isRoot(), SysRole::getCode, SystemConstants.ROOT_ROLE_CODE)\n                .select(SysRole::getId, SysRole::getName)\n                .orderByAsc(SysRole::getSort)\n        );",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to view roles, ensuring that non-admin users cannot see the root role.",
+                            "Details": "The permission check is enforced by the control logic that checks if the user is not a root user. If the user is not a root user, the query will not return the root role, thus enforcing access control.",
+                            "Relevant Code Snippet": "ne(!SecurityUtils.isRoot(), SysRole::getCode, SystemConstants.ROOT_ROLE_CODE)",
+                            "Detailed Code Snippet": "public static boolean isRoot() {\n    // Logic to determine if the current user is a root user\n    return getCurrentUser().getRole().equals(ROOT_ROLE);\n}"
+                        }
+                    },
+                    {
+                        "location": "SysRoleController.java:listRoleOptions",
+                        "Operation Description": "Querying the list of roles from the database while excluding the root role.",
+                        "Relevant Code Snippet": "List<SysRole> roleList = this.list(new LambdaQueryWrapper<SysRole>()\n                .ne(!SecurityUtils.isRoot(), SysRole::getCode, SystemConstants.ROOT_ROLE_CODE)\n                .select(SysRole::getId, SysRole::getName)\n                .orderByAsc(SysRole::getSort)\n        );",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to query roles excluding the root role.",
+                            "Details": "The permission check is enforced by the condition '!SecurityUtils.isRoot()', which ensures that the current user is not the root user before allowing access to the role list.",
+                            "Relevant Code Snippet": "!SecurityUtils.isRoot()",
+                            "Detailed Code Snippet": "public static boolean isRoot() {\n    // Logic to determine if the current user is the root user\n    return currentUser.getId().equals(ROOT_USER_ID);\n}"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "Ensures that a role exists before allowing menu assignments, enforcing access control through null checks.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleController.java:assignMenusToRole",
+                        "Operation Description": "Retrieving the role by its ID to ensure it exists before assigning menus.",
+                        "Relevant Code Snippet": "SysRole role = this.getById(roleId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the role by its ID.",
+                            "Details": "The permission check is enforced by the assertion that the role must not be null, ensuring that the role exists before proceeding with the operation.",
+                            "Relevant Code Snippet": "Assert.isTrue(role != null, \"\u89d2\u8272\u4e0d\u5b58\u5728\");",
+                            "Detailed Code Snippet": "Assert.isTrue(role != null, \"\u89d2\u8272\u4e0d\u5b58\u5728\");"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that users have the necessary permissions to verify the existence of a role before allowing updates.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "SysRoleServiceImpl.java:saveRole",
+                        "Operation Description": "Retrieving the existing role by its ID to check if it exists before updating.",
+                        "Relevant Code Snippet": "oldRole = this.getById(roleId);",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to check if the role exists before updating.",
+                            "Details": "The permission check is enforced by the @PreAuthorize annotation in the calling method, which ensures that the user has the necessary permissions to perform the find operation on roles.",
+                            "Relevant Code Snippet": "@PreAuthorize(\"@ss.hasPerm('sys:role:edit')\")",
+                            "Detailed Code Snippet": "The @PreAuthorize annotation checks if the user has the 'sys:role:edit' permission before allowing the updateRole method to execute."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "youlai-mall",
+        "location": "SysUserController.java:getUserForm",
+        "Operation Description": "Retrieving user form data for the specified user ID.",
+        "Relevant Code Snippet": "UserForm formData = userService.getUserFormData(userId);",
+        "Object": "formData",
+        "Object Description": "The user form data retrieved for the specified user ID.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bbf\u95ee\u5176\u8ba4\u8bc1\u4fe1\u606f\u7684\u6743\u9650\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access user authentication information.",
+                        "Details": "The permission check is enforced within the userService.getUserAuthInfo method, which retrieves user authentication information based on the username provided. If the user does not have the necessary permissions, the method may return null or throw an exception.",
+                        "Relevant Code Snippet": "if (userAuthInfo != null) {",
+                        "Detailed Code Snippet": "public UserAuthInfo getUserAuthInfo(String username) {\n        UserAuthInfo userAuthInfo = this.baseMapper.getUserAuthInfo(username);\n        if (userAuthInfo != null) {\n            Set<String> roles = userAuthInfo.getRoles();\n            if (CollectionUtil.isNotEmpty(roles)) {\n                Integer dataScope = roleService.getMaxDataRangeDataScope(roles);\n                userAuthInfo.setDataScope(dataScope);\n            }\n        }\n        return userAuthInfo;\n    }"
+                    },
+                    {
+                        "Description": "Requires permission to access user authentication information.",
+                        "Details": "The permission check is enforced within the userService.getUserAuthInfo method, which retrieves user authentication information based on the username provided. If the user does not have the necessary permissions, the method may return null or throw an exception.",
+                        "Relevant Code Snippet": "if (userAuthInfo != null) {",
+                        "Detailed Code Snippet": "public UserAuthInfo getUserAuthInfo(String username) {\n        UserAuthInfo userAuthInfo = this.baseMapper.getUserAuthInfo(username);\n        if (userAuthInfo != null) {\n            Set<String> roles = userAuthInfo.getRoles();\n            if (CollectionUtil.isNotEmpty(roles)) {\n                Integer dataScope = roleService.getMaxDataRangeDataScope(roles);\n                userAuthInfo.setDataScope(dataScope);\n            }\n        }\n        return userAuthInfo;\n    }"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u7ecf\u8fc7\u8eab\u4efd\u9a8c\u8bc1\u540e\u624d\u80fd\u8bbf\u95ee\u5176\u4e2a\u4eba\u4fe1\u606f\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access the current user's information.",
+                        "Details": "The permission check is implicitly enforced by the method that retrieves the current user's information based on the username. The method uses SecurityUtils.getUsername() to get the username of the currently logged-in user, which implies that the user must be authenticated to access their own information.",
+                        "Relevant Code Snippet": "this.getOne(new LambdaQueryWrapper<SysUser>()\n.eq(SysUser::getUsername, SecurityUtils.getUsername())",
+                        "Detailed Code Snippet": "SecurityUtils.getUsername() checks if the user is authenticated and retrieves the username."
+                    },
+                    {
+                        "Description": "Requires permission to access the current user's information.",
+                        "Details": "The permission check is enforced by the SecurityUtils.getUsername() method, which ensures that the user is authenticated and has the right to access their own information.",
+                        "Relevant Code Snippet": "SecurityUtils.getUsername()",
+                        "Detailed Code Snippet": "public static String getUsername() {\n    // Logic to retrieve the currently authenticated user's username\n    return SecurityContextHolder.getContext().getAuthentication().getName();\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u53ea\u80fd\u8bbf\u95ee\u81ea\u5df1\u7684\u4e2a\u4eba\u8d44\u6599\u4fe1\u606f\uff0c\u9a8c\u8bc1\u8eab\u4efd\u548c\u6388\u6743\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access user profile information.",
+                        "Details": "The permission check is enforced by retrieving the user ID from the security context, which ensures that the user is authenticated and authorized to access their own profile information.",
+                        "Relevant Code Snippet": "Long userId = SecurityUtils.getUserId();",
+                        "Detailed Code Snippet": "public Long getUserId() {\n    // Logic to retrieve the current user's ID from the security context\n    return currentUser.getId();\n}"
+                    },
+                    {
+                        "Description": "Requires permission to access user profile information.",
+                        "Details": "The permission check is enforced by retrieving the user ID from the security context, which ensures that the user is authenticated and authorized to access their own profile information.",
+                        "Relevant Code Snippet": "Long userId = SecurityUtils.getUserId();",
+                        "Detailed Code Snippet": "public Long getUserId() {\n    // Logic to retrieve the current user's ID from the security context\n    return currentUser.getId();\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bfb\u53d6\u7528\u6237\u6570\u636e\u548c\u8be6\u60c5\u7684\u6743\u9650\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read user data.",
+                        "Details": "The permission check is enforced by the @PreAuthorize annotation in the calling method, which ensures that the user has the necessary permissions to perform the read operation on user data.",
+                        "Relevant Code Snippet": "@PreAuthorize(\"hasAuthority('user:read')\")",
+                        "Detailed Code Snippet": "None"
+                    },
+                    {
+                        "Description": "Requires permission to read user details.",
+                        "Details": "The permission check is enforced by the controller method that calls getUserFormData, ensuring that the user has the necessary permissions to retrieve user details.",
+                        "Relevant Code Snippet": "@GetMapping(\"/{userId}/form\")",
+                        "Detailed Code Snippet": "@Operation(summary = \"\u7528\u6237\u8868\u5355\u6570\u636e\")\n@GetMapping(\"/{userId}/form\")\npublic Result<UserForm> getUserForm(\n        @Parameter(description = \"\u7528\u6237ID\") @PathVariable Long userId\n) {\n    UserForm formData = userService.getUserFormData(userId);\n    return Result.success(formData);\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u53ea\u80fd\u8bbf\u95ee\u81ea\u5df1\u7684\u4fe1\u606f\uff0c\u9632\u6b62\u672a\u6388\u6743\u8bbf\u95ee\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read the current user's information.",
+                        "Details": "The permission check is implied through the use of SecurityUtils.getUsername(), which retrieves the username of the currently logged-in user. The system must ensure that the user has the right to access their own information.",
+                        "Relevant Code Snippet": "SecurityUtils.getUsername()",
+                        "Detailed Code Snippet": "None"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u9a8c\u8bc1\u7528\u6237\u6ce8\u518c\u4fe1\u606f\u7684\u6743\u9650\uff0c\u786e\u4fdd\u7528\u6237\u552f\u4e00\u6027\u548c\u6570\u636e\u5b89\u5168\u3002",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to read user information to check for existing registrations.",
+                        "Details": "The permission check is enforced by counting existing users with the same mobile number or username, ensuring that the system can verify if a user is already registered.",
+                        "Relevant Code Snippet": "long count = this.count(new LambdaQueryWrapper<SysUser>()\n                .eq(SysUser::getMobile, mobile)\n                .or()\n                .eq(SysUser::getUsername, mobile)\n        );",
+                        "Detailed Code Snippet": "public long count(LambdaQueryWrapper<SysUser> queryWrapper) {\n    // Implementation that counts users based on the query criteria\n}"
+                    }
+                ]
+            },
+            {
+                "permission_description": "\u786e\u4fdd\u7528\u6237\u5177\u5907\u8bbf\u95ee\u548c\u67e5\u8be2\u7528\u6237\u6570\u636e\u5e93\u7684\u6743\u9650",
+                "Permission Requirements": [
+                    {
+                        "Description": "Requires permission to access the user database.",
+                        "Details": "The permission check is enforced by the baseMapper.getUserPage method, which should include a check to ensure the user has the necessary permissions to query user data from the database.",
+                        "Relevant Code Snippet": "this.baseMapper.getUserPage(page, queryParams);",
+                        "Detailed Code Snippet": "public Page<UserBO> getUserPage(Page<UserBO> page, UserPageQuery queryParams) { /* permission check logic */ }"
+                    },
+                    {
+                        "Description": "Requires permission to access the user list.",
+                        "Details": "The permission check is enforced by the controller method that calls getUserPage, ensuring that the user has the necessary permissions to retrieve user data.",
+                        "Relevant Code Snippet": "@GetMapping(\"/page\")",
+                        "Detailed Code Snippet": "public PageResult<UserPageVO> getUserPage(@ParameterObject UserPageQuery queryParams) { IPage<UserPageVO> result = userService.getUserPage(queryParams); return PageResult.success(result); }"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "SpringBlade",
+        "location": "MenuController.java:authRoutes",
+        "Operation Description": "Retrieving menu routes based on user role IDs.",
+        "Relevant Code Snippet": "List<MenuDTO> routes = baseMapper.authRoutes(Func.toLongList(user.getRoleId()));",
+        "Object": "routes",
+        "Object Description": "The list of menu routes retrieved based on the user's role IDs.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only users with an admin role can access specific menu details, enforcing role-based access control.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "MenuServiceImpl.java:lazyMenuList",
+                        "Operation Description": "Calling the lazyMenuList function to get a list of MenuVO objects.",
+                        "Relevant Code Snippet": "List<MenuVO> list = menuService.lazyMenuList(parentId, menu);",
+                        "Permission Requirements": {
+                            "Description": "Requires admin role to retrieve Menu details.",
+                            "Details": "The permission check is enforced by the @PreAuth(RoleConstant.HAS_ROLE_ADMIN) annotation, which ensures that only users with the admin role can access the detail operation.",
+                            "Relevant Code Snippet": "@PreAuth(RoleConstant.HAS_ROLE_ADMIN)",
+                            "Detailed Code Snippet": "public R<MenuVO> detail(Menu menu) { ... }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users can access menu and button data based on their authenticated role and tenant ID.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "MenuController.java:routes",
+                        "Operation Description": "Retrieving menu data based on the user's role ID.",
+                        "Relevant Code Snippet": "List<MenuVO> list = menuService.routes((user == null || user.getUserId() == 0L) ? null : user.getRoleId());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access menu data based on the user's role.",
+                            "Details": "The operation checks if the user is null or has a user ID of 0, which indicates that the user is not authenticated or does not have a valid role. If the user is authenticated, it retrieves the role ID to fetch the corresponding menu data.",
+                            "Relevant Code Snippet": "userService.routes((user == null || user.getUserId() == 0L) ? null : user.getRoleId())",
+                            "Detailed Code Snippet": "None"
+                        }
+                    },
+                    {
+                        "location": "MenuController.java:buttons",
+                        "Operation Description": "Fetching button data for the user based on their role ID.",
+                        "Relevant Code Snippet": "List<MenuVO> list = menuService.buttons(user.getRoleId());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access buttons based on the user's role ID.",
+                            "Details": "The permission check is enforced by the user.getRoleId() method, which retrieves the role ID of the user. If the user does not have a valid role or the role does not have permission to access the buttons, the operation should not proceed.",
+                            "Relevant Code Snippet": "menuService.buttons(user.getRoleId())",
+                            "Detailed Code Snippet": "None"
+                        }
+                    },
+                    {
+                        "location": "MenuServiceImpl.java:grantDataScopeTree",
+                        "Operation Description": "Fetching the menu data scope tree for the user in the grantTree function.",
+                        "Relevant Code Snippet": "menuService.grantDataScopeTree(user)",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the menu tree based on tenant ID or role ID.",
+                            "Details": "The permission check is implicitly based on the user's tenant ID. If the user is an admin (identified by comparing tenant ID with BladeConstant.ADMIN_TENANT_ID), the full menu tree is retrieved. Otherwise, the menu tree is filtered based on the user's role ID.",
+                            "Relevant Code Snippet": "user.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID)",
+                            "Detailed Code Snippet": "if (user.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID)) { return baseMapper.grantTree(); } else { return baseMapper.grantTreeByRole(Func.toLongList(user.getRoleId())); }"
+                        }
+                    },
+                    {
+                        "location": "MenuServiceImpl.java:grantTree",
+                        "Operation Description": "Retrieving the menu tree for the user in the MenuController.",
+                        "Relevant Code Snippet": "menuService.grantTree(user)",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the menu tree based on the user's role.",
+                            "Details": "The permission check is enforced by the logic in the MenuServiceImpl's grantTree method, which checks the user's tenant ID and role ID to determine the appropriate menu tree to return.",
+                            "Relevant Code Snippet": "menuService.grantTree(user)",
+                            "Detailed Code Snippet": "GrantTreeVO vo = new GrantTreeVO(); vo.setMenu(menuService.grantTree(user));"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only authorized users can transform Menu objects into MenuVO objects, enforcing access control during the transformation process.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "MenuServiceImpl.java:routes",
+                        "Operation Description": "Transforming the filtered list of Menu objects into MenuVO objects.",
+                        "Relevant Code Snippet": "List<MenuVO> collect = list.stream().map(menu -> BeanUtil.copyProperties(menu, MenuVO.class)).collect(Collectors.toList());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to transform Menu objects into MenuVO objects.",
+                            "Details": "The permission check is enforced by the calling function in MenuController, which ensures that the user has the necessary permissions to perform the transformation.",
+                            "Relevant Code Snippet": "public R<List<MenuVO>> routes(BladeUser user) { ... }",
+                            "Detailed Code Snippet": "public List<MenuVO> listNodeVO(List<Menu> list) { ... }"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "Project": "SpringBlade",
+        "location": "MenuController.java:authRoutes",
+        "Operation Description": "Fetching the authorized routes for the user in the authRoutes function.",
+        "Relevant Code Snippet": "return R.data(menuService.authRoutes(user));",
+        "Object": "menuService.authRoutes(user)",
+        "Object Description": "The method call that retrieves the authorized routes for the given user.",
+        "Permission Requirements": [
+            {
+                "Description": "None",
+                "Details": "None",
+                "Relevant Code Snippet": "None",
+                "Detailed Code Snippet": "None"
+            }
+        ],
+        "missing_permission": [
+            {
+                "permission_description": "This permission check ensures that only users with an admin role can access specific menu details, enforcing role-based access control.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "MenuServiceImpl.java:lazyMenuList",
+                        "Operation Description": "Calling the lazyMenuList function to get a list of MenuVO objects.",
+                        "Relevant Code Snippet": "List<MenuVO> list = menuService.lazyMenuList(parentId, menu);",
+                        "Permission Requirements": {
+                            "Description": "Requires admin role to retrieve Menu details.",
+                            "Details": "The permission check is enforced by the @PreAuth(RoleConstant.HAS_ROLE_ADMIN) annotation, which ensures that only users with the admin role can access the detail operation.",
+                            "Relevant Code Snippet": "@PreAuth(RoleConstant.HAS_ROLE_ADMIN)",
+                            "Detailed Code Snippet": "public R<MenuVO> detail(Menu menu) { ... }"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This category of permission checks ensures users can access menu and button data based on their authenticated role and tenant ID.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "MenuController.java:routes",
+                        "Operation Description": "Retrieving menu data based on the user's role ID.",
+                        "Relevant Code Snippet": "List<MenuVO> list = menuService.routes((user == null || user.getUserId() == 0L) ? null : user.getRoleId());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access menu data based on the user's role.",
+                            "Details": "The operation checks if the user is null or has a user ID of 0, which indicates that the user is not authenticated or does not have a valid role. If the user is authenticated, it retrieves the role ID to fetch the corresponding menu data.",
+                            "Relevant Code Snippet": "userService.routes((user == null || user.getUserId() == 0L) ? null : user.getRoleId())",
+                            "Detailed Code Snippet": "None"
+                        }
+                    },
+                    {
+                        "location": "MenuController.java:buttons",
+                        "Operation Description": "Fetching button data for the user based on their role ID.",
+                        "Relevant Code Snippet": "List<MenuVO> list = menuService.buttons(user.getRoleId());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access buttons based on the user's role ID.",
+                            "Details": "The permission check is enforced by the user.getRoleId() method, which retrieves the role ID of the user. If the user does not have a valid role or the role does not have permission to access the buttons, the operation should not proceed.",
+                            "Relevant Code Snippet": "menuService.buttons(user.getRoleId())",
+                            "Detailed Code Snippet": "None"
+                        }
+                    },
+                    {
+                        "location": "MenuServiceImpl.java:grantDataScopeTree",
+                        "Operation Description": "Fetching the menu data scope tree for the user in the grantTree function.",
+                        "Relevant Code Snippet": "menuService.grantDataScopeTree(user)",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the menu tree based on tenant ID or role ID.",
+                            "Details": "The permission check is implicitly based on the user's tenant ID. If the user is an admin (identified by comparing tenant ID with BladeConstant.ADMIN_TENANT_ID), the full menu tree is retrieved. Otherwise, the menu tree is filtered based on the user's role ID.",
+                            "Relevant Code Snippet": "user.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID)",
+                            "Detailed Code Snippet": "if (user.getTenantId().equals(BladeConstant.ADMIN_TENANT_ID)) { return baseMapper.grantTree(); } else { return baseMapper.grantTreeByRole(Func.toLongList(user.getRoleId())); }"
+                        }
+                    },
+                    {
+                        "location": "MenuServiceImpl.java:grantTree",
+                        "Operation Description": "Retrieving the menu tree for the user in the MenuController.",
+                        "Relevant Code Snippet": "menuService.grantTree(user)",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to access the menu tree based on the user's role.",
+                            "Details": "The permission check is enforced by the logic in the MenuServiceImpl's grantTree method, which checks the user's tenant ID and role ID to determine the appropriate menu tree to return.",
+                            "Relevant Code Snippet": "menuService.grantTree(user)",
+                            "Detailed Code Snippet": "GrantTreeVO vo = new GrantTreeVO(); vo.setMenu(menuService.grantTree(user));"
+                        }
+                    }
+                ]
+            },
+            {
+                "permission_description": "This permission check ensures that only authorized users can transform Menu objects into MenuVO objects, enforcing access control during the transformation process.",
+                "missing_permission_requirements": [
+                    {
+                        "location": "MenuServiceImpl.java:routes",
+                        "Operation Description": "Transforming the filtered list of Menu objects into MenuVO objects.",
+                        "Relevant Code Snippet": "List<MenuVO> collect = list.stream().map(menu -> BeanUtil.copyProperties(menu, MenuVO.class)).collect(Collectors.toList());",
+                        "Permission Requirements": {
+                            "Description": "Requires permission to transform Menu objects into MenuVO objects.",
+                            "Details": "The permission check is enforced by the calling function in MenuController, which ensures that the user has the necessary permissions to perform the transformation.",
+                            "Relevant Code Snippet": "public R<List<MenuVO>> routes(BladeUser user) { ... }",
+                            "Detailed Code Snippet": "public List<MenuVO> listNodeVO(List<Menu> list) { ... }"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]
