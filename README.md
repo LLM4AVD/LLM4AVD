@@ -4,7 +4,7 @@ We propose LLM4AVD, an LLM-driven approach for detecting authorization vulnerabi
 
 ## Benchmark
 
-We construct a new dataset, AuthVul, which contains 230 historical authorization vulnerabilities extracted from representative open-source Java Web applications and 19 vulnerabilities extracted from industrial applications. Due to confidentiality constraints, the detailed vulnerability information of these industrial applications cannot be publicly released. The open-source data is available [AuthVul](https://https://github.com/LLM4AVD/LLM4AVD/blob/main/benchmark.json)
+We construct a new dataset, AuthVul, which contains 230 historical authorization vulnerabilities extracted from representative open-source Java Web applications and 19 vulnerabilities extracted from industrial applications. Due to confidentiality constraints, the detailed vulnerability information of these industrial applications cannot be publicly released. The open-source data is available [here](https://https://github.com/LLM4AVD/LLM4AVD/blob/main/benchmark.json).
 
 ## Results
 
