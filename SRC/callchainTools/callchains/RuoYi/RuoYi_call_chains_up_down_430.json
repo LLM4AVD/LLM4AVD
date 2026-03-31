@@ -1,0 +1,1426 @@
+{
+    "SysMenu": {
+        "SysIndexController.java:index": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysIndexController.java",
+            "function_name": "index",
+            "code_snippet": "@GetMapping(\"/index\")\n    public String index(ModelMap mmap)\n    {\n        // 取身份信息\n        SysUser user = getSysUser();\n        // 根据用户id取出菜单\n        List<SysMenu> menus = menuService.selectMenusByUser(user);\n        mmap.put(\"menus\", menus);\n        mmap.put(\"user\", user);\n        mmap.put(\"sideTheme\", configService.selectConfigByKey(\"sys.index.sideTheme\"));\n        mmap.put(\"skinName\", configService.selectConfigByKey(\"sys.index.skinName\"));\n        Boolean footer = Convert.toBool(configService.selectConfigByKey(\"sys.index.footer\"), true);\n        Boolean tagsView = Convert.toBool(configService.selectConfigByKey(\"sys.index.tagsView\"), true);\n        mmap.put(\"footer\", footer);\n        mmap.put(\"tagsView\", tagsView);\n        mmap.put(\"mainClass\", contentMainClass(footer, tagsView));\n        mmap.put(\"copyrightYear\", RuoYiConfig.getCopyrightYear());\n        mmap.put(\"demoEnabled\", RuoYiConfig.isDemoEnabled());\n        mmap.put(\"isDefaultModifyPwd\", initPasswordIsModify(user.getPwdUpdateDate()));\n        mmap.put(\"isPasswordExpired\", passwordIsExpiration(user.getPwdUpdateDate()));\n        mmap.put(\"isMobile\", ServletUtils.checkAgentIsMobile(ServletUtils.getRequest().getHeader(\"User-Agent\")));\n\n        // 菜单导航显示风格\n        String menuStyle = configService.selectConfigByKey(\"sys.index.menuStyle\");\n        // 移动端，默认使左侧导航菜单，否则取默认配置\n        String indexStyle = ServletUtils.checkAgentIsMobile(ServletUtils.getRequest().getHeader(\"User-Agent\")) ? \"index\" : menuStyle;\n\n        // 优先Cookie配置导航菜单\n        Cookie[] cookies = ServletUtils.getRequest().getCookies();\n        for (Cookie cookie : cookies)\n        {\n            if (StringUtils.isNotEmpty(cookie.getName()) && \"nav-style\".equalsIgnoreCase(cookie.getName()))\n            {\n                indexStyle = cookie.getValue();\n                break;\n            }\n        }\n        String webIndex = \"topnav\".equalsIgnoreCase(indexStyle) ? \"index-topnav\" : \"index\";\n        return webIndex;\n    }\n",
+            "call_chain_down": [
+                "SysMenuServiceImpl.java:selectMenusByUser"
+            ],
+            "call_chain_code_down": [
+                "    public List<SysMenu> selectMenusByUser(SysUser user)\n    {\n        List<SysMenu> menus = new LinkedList<SysMenu>();\n        // 管理员显示所有菜单信息\n        if (user.isAdmin())\n        {\n            menus = menuMapper.selectMenuNormalAll();\n        }\n        else\n        {\n            menus = menuMapper.selectMenusByUserId(user.getUserId());\n        }\n        return getChildPerms(menus, 0);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@GetMapping(\"/index\")"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuController.java:list": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java",
+            "function_name": "list",
+            "code_snippet": "@RequiresPermissions(\"system:menu:list\")\n@PostMapping(\"/list\")\n@ResponseBody\n    public List<SysMenu> list(SysMenu menu)\n    {\n        Long userId = ShiroUtils.getUserId();\n        List<SysMenu> menuList = menuService.selectMenuList(menu, userId);\n        return menuList;\n    }\n",
+            "call_chain_down": [
+                "SysMenuServiceImpl.java:selectMenuList"
+            ],
+            "call_chain_code_down": [
+                "    public List<SysMenu> selectMenuList(SysMenu menu, Long userId)\n    {\n        List<SysMenu> menuList = null;\n        if (SysUser.isAdmin(userId))\n        {\n            menuList = menuMapper.selectMenuList(menu);\n        }\n        else\n        {\n            menu.getParams().put(\"userId\", userId);\n            menuList = menuMapper.selectMenuListByUserId(menu);\n        }\n        return menuList;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:menu:list\")",
+                    "@PostMapping(\"/list\")",
+                    "@ResponseBody"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuController.java:remove": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java",
+            "function_name": "remove",
+            "code_snippet": "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)\n@RequiresPermissions(\"system:menu:remove\")\n@GetMapping(\"/remove/{menuId}\")\n@ResponseBody\n    public AjaxResult remove(@PathVariable(\"menuId\") Long menuId)\n    {\n        if (menuService.selectCountMenuByParentId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"存在子菜单,不允许删除\");\n        }\n        if (menuService.selectCountRoleMenuByMenuId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"菜单已分配,不允许删除\");\n        }\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.deleteMenuById(menuId));\n    }\n",
+            "call_chain_down": [
+                "BaseController.java:toAjax",
+                "SysMenuServiceImpl.java:selectCountMenuByParentId",
+                "SysMenuServiceImpl.java:selectCountRoleMenuByMenuId",
+                "SysMenuServiceImpl.java:deleteMenuById"
+            ],
+            "call_chain_code_down": [
+                "    protected AjaxResult toAjax(int rows)\n    {\n        return rows > 0 ? success() : error();\n    }\n",
+                "    public int selectCountMenuByParentId(Long parentId)\n    {\n        return menuMapper.selectCountMenuByParentId(parentId);\n    }\n",
+                "    public int selectCountRoleMenuByMenuId(Long menuId)\n    {\n        return roleMenuMapper.selectCountRoleMenuByMenuId(menuId);\n    }\n",
+                "    public int deleteMenuById(Long menuId)\n    {\n        return menuMapper.deleteMenuById(menuId);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)",
+                    "@RequiresPermissions(\"system:menu:remove\")",
+                    "@GetMapping(\"/remove/{menuId}\")",
+                    "@ResponseBody"
+                ],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuController.java:add": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java",
+            "function_name": "add",
+            "code_snippet": "@GetMapping(\"/add/{parentId}\")\n    public String add(@PathVariable(\"parentId\") Long parentId, ModelMap mmap)\n    {\n        SysMenu menu = null;\n        if (0L != parentId)\n        {\n            menu = menuService.selectMenuById(parentId);\n        }\n        else\n        {\n            menu = new SysMenu();\n            menu.setMenuId(0L);\n            menu.setMenuName(\"主目录\");\n        }\n        mmap.put(\"menu\", menu);\n        return prefix + \"/add\";\n    }\n",
+            "call_chain_down": [
+                "SysMenuServiceImpl.java:selectMenuById",
+                "SysMenu.java:setMenuId",
+                "SysMenu.java:setMenuName"
+            ],
+            "call_chain_code_down": [
+                "    public SysMenu selectMenuById(Long menuId)\n    {\n        return menuMapper.selectMenuById(menuId);\n    }\n",
+                "    public void setMenuId(Long menuId)\n    {\n        this.menuId = menuId;\n    }\n",
+                "    public void setMenuName(String menuName)\n    {\n        this.menuName = menuName;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@GetMapping(\"/add/{parentId}\")"
+                ],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuController.java:addSave": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java",
+            "function_name": "addSave",
+            "code_snippet": "@Log(title = \"菜单管理\", businessType = BusinessType.INSERT)\n@RequiresPermissions(\"system:menu:add\")\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysMenu menu)\n    {\n        if (!menuService.checkMenuNameUnique(menu))\n        {\n            return error(\"新增菜单'\" + menu.getMenuName() + \"'失败，菜单名称已存在\");\n        }\n        menu.setCreateBy(getLoginName());\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.insertMenu(menu));\n    }\n",
+            "call_chain_down": [
+                "BaseController.java:toAjax",
+                "SysMenuServiceImpl.java:checkMenuNameUnique",
+                "SysMenu.java:getMenuName",
+                "BaseEntity.java:setCreateBy",
+                "SysMenuServiceImpl.java:insertMenu"
+            ],
+            "call_chain_code_down": [
+                "    protected AjaxResult toAjax(int rows)\n    {\n        return rows > 0 ? success() : error();\n    }\n",
+                "    public boolean checkMenuNameUnique(SysMenu menu)\n    {\n        Long menuId = StringUtils.isNull(menu.getMenuId()) ? -1L : menu.getMenuId();\n        SysMenu info = menuMapper.checkMenuNameUnique(menu.getMenuName(), menu.getParentId());\n        if (StringUtils.isNotNull(info) && info.getMenuId().longValue() != menuId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+                "    public String getMenuName()\n    {\n        return menuName;\n    }\n",
+                "    public void setCreateBy(String createBy)\n    {\n        this.createBy = createBy;\n    }\n",
+                "    public int insertMenu(SysMenu menu)\n    {\n        return menuMapper.insertMenu(menu);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.INSERT)",
+                    "@RequiresPermissions(\"system:menu:add\")",
+                    "@PostMapping(\"/add\")",
+                    "@ResponseBody"
+                ],
+                [],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuController.java:edit": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java",
+            "function_name": "edit",
+            "code_snippet": "@RequiresPermissions(\"system:menu:edit\")\n@GetMapping(\"/edit/{menuId}\")\n    public String edit(@PathVariable(\"menuId\") Long menuId, ModelMap mmap)\n    {\n        mmap.put(\"menu\", menuService.selectMenuById(menuId));\n        return prefix + \"/edit\";\n    }\n",
+            "call_chain_down": [
+                "SysMenuServiceImpl.java:selectMenuById"
+            ],
+            "call_chain_code_down": [
+                "    public SysMenu selectMenuById(Long menuId)\n    {\n        return menuMapper.selectMenuById(menuId);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:menu:edit\")",
+                    "@GetMapping(\"/edit/{menuId}\")"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuController.java:editSave": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java",
+            "function_name": "editSave",
+            "code_snippet": "@Log(title = \"菜单管理\", businessType = BusinessType.UPDATE)\n@RequiresPermissions(\"system:menu:edit\")\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysMenu menu)\n    {\n        if (!menuService.checkMenuNameUnique(menu))\n        {\n            return error(\"修改菜单'\" + menu.getMenuName() + \"'失败，菜单名称已存在\");\n        }\n        menu.setUpdateBy(getLoginName());\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.updateMenu(menu));\n    }\n",
+            "call_chain_down": [
+                "BaseController.java:toAjax",
+                "SysMenuServiceImpl.java:checkMenuNameUnique",
+                "SysMenu.java:getMenuName",
+                "BaseEntity.java:setUpdateBy",
+                "SysMenuServiceImpl.java:updateMenu"
+            ],
+            "call_chain_code_down": [
+                "    protected AjaxResult toAjax(int rows)\n    {\n        return rows > 0 ? success() : error();\n    }\n",
+                "    public boolean checkMenuNameUnique(SysMenu menu)\n    {\n        Long menuId = StringUtils.isNull(menu.getMenuId()) ? -1L : menu.getMenuId();\n        SysMenu info = menuMapper.checkMenuNameUnique(menu.getMenuName(), menu.getParentId());\n        if (StringUtils.isNotNull(info) && info.getMenuId().longValue() != menuId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+                "    public String getMenuName()\n    {\n        return menuName;\n    }\n",
+                "    public void setUpdateBy(String updateBy)\n    {\n        this.updateBy = updateBy;\n    }\n",
+                "    public int updateMenu(SysMenu menu)\n    {\n        return menuMapper.updateMenu(menu);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.UPDATE)",
+                    "@RequiresPermissions(\"system:menu:edit\")",
+                    "@PostMapping(\"/edit\")",
+                    "@ResponseBody"
+                ],
+                [],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuController.java:checkMenuNameUnique": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysMenuController.java",
+            "function_name": "checkMenuNameUnique",
+            "code_snippet": "@PostMapping(\"/checkMenuNameUnique\")\n@ResponseBody\n    public boolean checkMenuNameUnique(SysMenu menu)\n    {\n        return menuService.checkMenuNameUnique(menu);\n    }\n",
+            "call_chain_down": [
+                "SysMenuServiceImpl.java:checkMenuNameUnique"
+            ],
+            "call_chain_code_down": [
+                "    public boolean checkMenuNameUnique(SysMenu menu)\n    {\n        Long menuId = StringUtils.isNull(menu.getMenuId()) ? -1L : menu.getMenuId();\n        SysMenu info = menuMapper.checkMenuNameUnique(menu.getMenuName(), menu.getParentId());\n        if (StringUtils.isNotNull(info) && info.getMenuId().longValue() != menuId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@PostMapping(\"/checkMenuNameUnique\")",
+                    "@ResponseBody"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuServiceImpl.java:selectMenusByUser": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectMenusByUser",
+            "code_snippet": "@Override\n    public List<SysMenu> selectMenusByUser(SysUser user)\n    {\n        List<SysMenu> menus = new LinkedList<SysMenu>();\n        // 管理员显示所有菜单信息\n        if (user.isAdmin())\n        {\n            menus = menuMapper.selectMenuNormalAll();\n        }\n        else\n        {\n            menus = menuMapper.selectMenusByUserId(user.getUserId());\n        }\n        return getChildPerms(menus, 0);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysIndexController.java:index"
+            ],
+            "call_chain_code_up": [
+                "@GetMapping(\"/index\")\n    public String index(ModelMap mmap)\n    {\n        // 取身份信息\n        SysUser user = getSysUser();\n        // 根据用户id取出菜单\n        List<SysMenu> menus = menuService.selectMenusByUser(user);\n        mmap.put(\"menus\", menus);\n        mmap.put(\"user\", user);\n        mmap.put(\"sideTheme\", configService.selectConfigByKey(\"sys.index.sideTheme\"));\n        mmap.put(\"skinName\", configService.selectConfigByKey(\"sys.index.skinName\"));\n        Boolean footer = Convert.toBool(configService.selectConfigByKey(\"sys.index.footer\"), true);\n        Boolean tagsView = Convert.toBool(configService.selectConfigByKey(\"sys.index.tagsView\"), true);\n        mmap.put(\"footer\", footer);\n        mmap.put(\"tagsView\", tagsView);\n        mmap.put(\"mainClass\", contentMainClass(footer, tagsView));\n        mmap.put(\"copyrightYear\", RuoYiConfig.getCopyrightYear());\n        mmap.put(\"demoEnabled\", RuoYiConfig.isDemoEnabled());\n        mmap.put(\"isDefaultModifyPwd\", initPasswordIsModify(user.getPwdUpdateDate()));\n        mmap.put(\"isPasswordExpired\", passwordIsExpiration(user.getPwdUpdateDate()));\n        mmap.put(\"isMobile\", ServletUtils.checkAgentIsMobile(ServletUtils.getRequest().getHeader(\"User-Agent\")));\n\n        // 菜单导航显示风格\n        String menuStyle = configService.selectConfigByKey(\"sys.index.menuStyle\");\n        // 移动端，默认使左侧导航菜单，否则取默认配置\n        String indexStyle = ServletUtils.checkAgentIsMobile(ServletUtils.getRequest().getHeader(\"User-Agent\")) ? \"index\" : menuStyle;\n\n        // 优先Cookie配置导航菜单\n        Cookie[] cookies = ServletUtils.getRequest().getCookies();\n        for (Cookie cookie : cookies)\n        {\n            if (StringUtils.isNotEmpty(cookie.getName()) && \"nav-style\".equalsIgnoreCase(cookie.getName()))\n            {\n                indexStyle = cookie.getValue();\n                break;\n            }\n        }\n        String webIndex = \"topnav\".equalsIgnoreCase(indexStyle) ? \"index-topnav\" : \"index\";\n        return webIndex;\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@GetMapping(\"/index\")"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectMenuList": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectMenuList",
+            "code_snippet": "@Override\n    public List<SysMenu> selectMenuList(SysMenu menu, Long userId)\n    {\n        List<SysMenu> menuList = null;\n        if (SysUser.isAdmin(userId))\n        {\n            menuList = menuMapper.selectMenuList(menu);\n        }\n        else\n        {\n            menu.getParams().put(\"userId\", userId);\n            menuList = menuMapper.selectMenuListByUserId(menu);\n        }\n        return menuList;\n    }\n",
+            "call_chain_down": [
+                "SysUser.java:isAdmin",
+                "BaseEntity.java:getParams"
+            ],
+            "call_chain_code_down": [
+                "    public boolean isAdmin()\n    {\n        return isAdmin(this.userId);\n    }\n",
+                "    public Map<String, Object> getParams()\n    {\n        if (params == null)\n        {\n            params = new HashMap<>();\n        }\n        return params;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                [],
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:list"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:menu:list\")\n@PostMapping(\"/list\")\n@ResponseBody\n    public List<SysMenu> list(SysMenu menu)\n    {\n        Long userId = ShiroUtils.getUserId();\n        List<SysMenu> menuList = menuService.selectMenuList(menu, userId);\n        return menuList;\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:menu:list\")",
+                    "@PostMapping(\"/list\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectMenuAll": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectMenuAll",
+            "code_snippet": "@Override\n    public List<SysMenu> selectMenuAll(Long userId)\n    {\n        List<SysMenu> menuList = null;\n        if (SysUser.isAdmin(userId))\n        {\n            menuList = menuMapper.selectMenuAll();\n        }\n        else\n        {\n            menuList = menuMapper.selectMenuAllByUserId(userId);\n        }\n        return menuList;\n    }\n",
+            "call_chain_down": [
+                "SysUser.java:isAdmin"
+            ],
+            "call_chain_code_down": [
+                "    public boolean isAdmin()\n    {\n        return isAdmin(this.userId);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuServiceImpl.java:roleMenuTreeData",
+                "SysMenuServiceImpl.java:menuTreeData",
+                "SysMenuServiceImpl.java:selectPermsAll"
+            ],
+            "call_chain_code_up": [
+                "@Override\n    public List<Ztree> roleMenuTreeData(SysRole role, Long userId)\n    {\n        Long roleId = role.getRoleId();\n        List<Ztree> ztrees = new ArrayList<Ztree>();\n        List<SysMenu> menuList = selectMenuAll(userId);\n        if (StringUtils.isNotNull(roleId))\n        {\n            List<String> roleMenuList = menuMapper.selectMenuTree(roleId);\n            ztrees = initZtree(menuList, roleMenuList, true);\n        }\n        else\n        {\n            ztrees = initZtree(menuList, null, true);\n        }\n        return ztrees;\n    }\n",
+                "@Override\n    public List<Ztree> menuTreeData(Long userId)\n    {\n        List<SysMenu> menuList = selectMenuAll(userId);\n        List<Ztree> ztrees = initZtree(menuList);\n        return ztrees;\n    }\n",
+                "@Override\n    public LinkedHashMap<String, String> selectPermsAll(Long userId)\n    {\n        LinkedHashMap<String, String> section = new LinkedHashMap<>();\n        List<SysMenu> permissions = selectMenuAll(userId);\n        if (StringUtils.isNotEmpty(permissions))\n        {\n            for (SysMenu menu : permissions)\n            {\n                section.put(menu.getUrl(), MessageFormat.format(PREMISSION_STRING, menu.getPerms()));\n            }\n        }\n        return section;\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Override"
+                ],
+                [
+                    "@Override"
+                ],
+                [
+                    "@Override"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectPermsByUserId": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectPermsByUserId",
+            "code_snippet": "@Override\n    public Set<String> selectPermsByUserId(Long userId)\n    {\n        List<String> perms = menuMapper.selectPermsByUserId(userId);\n        Set<String> permsSet = new HashSet<>();\n        for (String perm : perms)\n        {\n            if (StringUtils.isNotEmpty(perm))\n            {\n                permsSet.addAll(Arrays.asList(perm.trim().split(\",\")));\n            }\n        }\n        return permsSet;\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "UserRealm.java:doGetAuthorizationInfo"
+            ],
+            "call_chain_code_up": [
+                "@Override\n    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection arg0)\n    {\n        SysUser user = ShiroUtils.getSysUser();\n        // 角色列表\n        Set<String> roles = new HashSet<String>();\n        // 功能列表\n        Set<String> menus = new HashSet<String>();\n        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();\n        // 管理员拥有所有权限\n        if (user.isAdmin())\n        {\n            info.addRole(\"admin\");\n            info.addStringPermission(\"*:*:*\");\n        }\n        else\n        {\n            roles = roleService.selectRoleKeys(user.getUserId());\n            menus = menuService.selectPermsByUserId(user.getUserId());\n            // 角色加入AuthorizationInfo认证对象\n            info.setRoles(roles);\n            // 权限加入AuthorizationInfo认证对象\n            info.setStringPermissions(menus);\n        }\n        return info;\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Override"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectPermsByRoleId": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectPermsByRoleId",
+            "code_snippet": "@Override\n    public Set<String> selectPermsByRoleId(Long roleId)\n    {\n        List<String> perms = menuMapper.selectPermsByRoleId(roleId);\n        Set<String> permsSet = new HashSet<>();\n        for (String perm : perms)\n        {\n            if (StringUtils.isNotEmpty(perm))\n            {\n                permsSet.addAll(Arrays.asList(perm.trim().split(\",\")));\n            }\n        }\n        return permsSet;\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysLoginService.java:setRolePermission"
+            ],
+            "call_chain_code_up": [
+                "    public void setRolePermission(SysUser user)\n    {\n        List<SysRole> roles = user.getRoles();\n        if (!roles.isEmpty())\n        {\n            // 设置permissions属性，以便数据权限匹配权限\n            for (SysRole role : roles)\n            {\n                if (StringUtils.equals(role.getStatus(), UserConstants.ROLE_NORMAL))\n                {\n                    Set<String> rolePerms = menuService.selectPermsByRoleId(role.getRoleId());\n                    role.setPermissions(rolePerms);\n                }\n            }\n        }\n    }\n"
+            ],
+            "annotation_up": [
+                []
+            ]
+        },
+        "SysMenuServiceImpl.java:menuTreeData": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "menuTreeData",
+            "code_snippet": "@Override\n    public List<Ztree> menuTreeData(Long userId)\n    {\n        List<SysMenu> menuList = selectMenuAll(userId);\n        List<Ztree> ztrees = initZtree(menuList);\n        return ztrees;\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:menuTreeData"
+            ],
+            "call_chain_code_up": [
+                "@GetMapping(\"/menuTreeData\")\n@ResponseBody\n    public List<Ztree> menuTreeData()\n    {\n        Long userId = ShiroUtils.getUserId();\n        List<Ztree> ztrees = menuService.menuTreeData(userId);\n        return ztrees;\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@GetMapping(\"/menuTreeData\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectPermsAll": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectPermsAll",
+            "code_snippet": "@Override\n    public LinkedHashMap<String, String> selectPermsAll(Long userId)\n    {\n        LinkedHashMap<String, String> section = new LinkedHashMap<>();\n        List<SysMenu> permissions = selectMenuAll(userId);\n        if (StringUtils.isNotEmpty(permissions))\n        {\n            for (SysMenu menu : permissions)\n            {\n                section.put(menu.getUrl(), MessageFormat.format(PREMISSION_STRING, menu.getPerms()));\n            }\n        }\n        return section;\n    }\n",
+            "call_chain_down": [
+                "SysMenu.java:getUrl",
+                "SysMenu.java:getPerms"
+            ],
+            "call_chain_code_down": [
+                "    public String getUrl()\n    {\n        return url;\n    }\n",
+                "    public String getPerms()\n    {\n        return perms;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysMenuServiceImpl.java:deleteMenuById": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "deleteMenuById",
+            "code_snippet": "@Override\n    public int deleteMenuById(Long menuId)\n    {\n        return menuMapper.deleteMenuById(menuId);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:remove"
+            ],
+            "call_chain_code_up": [
+                "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)\n@RequiresPermissions(\"system:menu:remove\")\n@GetMapping(\"/remove/{menuId}\")\n@ResponseBody\n    public AjaxResult remove(@PathVariable(\"menuId\") Long menuId)\n    {\n        if (menuService.selectCountMenuByParentId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"存在子菜单,不允许删除\");\n        }\n        if (menuService.selectCountRoleMenuByMenuId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"菜单已分配,不允许删除\");\n        }\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.deleteMenuById(menuId));\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)",
+                    "@RequiresPermissions(\"system:menu:remove\")",
+                    "@GetMapping(\"/remove/{menuId}\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectMenuById": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectMenuById",
+            "code_snippet": "@Override\n    public SysMenu selectMenuById(Long menuId)\n    {\n        return menuMapper.selectMenuById(menuId);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:add",
+                "SysMenuController.java:edit",
+                "SysMenuController.java:selectMenuTree"
+            ],
+            "call_chain_code_up": [
+                "@GetMapping(\"/add/{parentId}\")\n    public String add(@PathVariable(\"parentId\") Long parentId, ModelMap mmap)\n    {\n        SysMenu menu = null;\n        if (0L != parentId)\n        {\n            menu = menuService.selectMenuById(parentId);\n        }\n        else\n        {\n            menu = new SysMenu();\n            menu.setMenuId(0L);\n            menu.setMenuName(\"主目录\");\n        }\n        mmap.put(\"menu\", menu);\n        return prefix + \"/add\";\n    }\n",
+                "@RequiresPermissions(\"system:menu:edit\")\n@GetMapping(\"/edit/{menuId}\")\n    public String edit(@PathVariable(\"menuId\") Long menuId, ModelMap mmap)\n    {\n        mmap.put(\"menu\", menuService.selectMenuById(menuId));\n        return prefix + \"/edit\";\n    }\n",
+                "@GetMapping(\"/selectMenuTree/{menuId}\")\n    public String selectMenuTree(@PathVariable(\"menuId\") Long menuId, ModelMap mmap)\n    {\n        mmap.put(\"menu\", menuService.selectMenuById(menuId));\n        return prefix + \"/tree\";\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@GetMapping(\"/add/{parentId}\")"
+                ],
+                [
+                    "@RequiresPermissions(\"system:menu:edit\")",
+                    "@GetMapping(\"/edit/{menuId}\")"
+                ],
+                [
+                    "@GetMapping(\"/selectMenuTree/{menuId}\")"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectCountMenuByParentId": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectCountMenuByParentId",
+            "code_snippet": "@Override\n    public int selectCountMenuByParentId(Long parentId)\n    {\n        return menuMapper.selectCountMenuByParentId(parentId);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:remove"
+            ],
+            "call_chain_code_up": [
+                "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)\n@RequiresPermissions(\"system:menu:remove\")\n@GetMapping(\"/remove/{menuId}\")\n@ResponseBody\n    public AjaxResult remove(@PathVariable(\"menuId\") Long menuId)\n    {\n        if (menuService.selectCountMenuByParentId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"存在子菜单,不允许删除\");\n        }\n        if (menuService.selectCountRoleMenuByMenuId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"菜单已分配,不允许删除\");\n        }\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.deleteMenuById(menuId));\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)",
+                    "@RequiresPermissions(\"system:menu:remove\")",
+                    "@GetMapping(\"/remove/{menuId}\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:selectCountRoleMenuByMenuId": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "selectCountRoleMenuByMenuId",
+            "code_snippet": "@Override\n    public int selectCountRoleMenuByMenuId(Long menuId)\n    {\n        return roleMenuMapper.selectCountRoleMenuByMenuId(menuId);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:remove"
+            ],
+            "call_chain_code_up": [
+                "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)\n@RequiresPermissions(\"system:menu:remove\")\n@GetMapping(\"/remove/{menuId}\")\n@ResponseBody\n    public AjaxResult remove(@PathVariable(\"menuId\") Long menuId)\n    {\n        if (menuService.selectCountMenuByParentId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"存在子菜单,不允许删除\");\n        }\n        if (menuService.selectCountRoleMenuByMenuId(menuId) > 0)\n        {\n            return AjaxResult.warn(\"菜单已分配,不允许删除\");\n        }\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.deleteMenuById(menuId));\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.DELETE)",
+                    "@RequiresPermissions(\"system:menu:remove\")",
+                    "@GetMapping(\"/remove/{menuId}\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:insertMenu": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "insertMenu",
+            "code_snippet": "@Override\n    public int insertMenu(SysMenu menu)\n    {\n        return menuMapper.insertMenu(menu);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:addSave"
+            ],
+            "call_chain_code_up": [
+                "@Log(title = \"菜单管理\", businessType = BusinessType.INSERT)\n@RequiresPermissions(\"system:menu:add\")\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysMenu menu)\n    {\n        if (!menuService.checkMenuNameUnique(menu))\n        {\n            return error(\"新增菜单'\" + menu.getMenuName() + \"'失败，菜单名称已存在\");\n        }\n        menu.setCreateBy(getLoginName());\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.insertMenu(menu));\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.INSERT)",
+                    "@RequiresPermissions(\"system:menu:add\")",
+                    "@PostMapping(\"/add\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:updateMenu": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "updateMenu",
+            "code_snippet": "@Override\n    public int updateMenu(SysMenu menu)\n    {\n        return menuMapper.updateMenu(menu);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:editSave"
+            ],
+            "call_chain_code_up": [
+                "@Log(title = \"菜单管理\", businessType = BusinessType.UPDATE)\n@RequiresPermissions(\"system:menu:edit\")\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysMenu menu)\n    {\n        if (!menuService.checkMenuNameUnique(menu))\n        {\n            return error(\"修改菜单'\" + menu.getMenuName() + \"'失败，菜单名称已存在\");\n        }\n        menu.setUpdateBy(getLoginName());\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.updateMenu(menu));\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.UPDATE)",
+                    "@RequiresPermissions(\"system:menu:edit\")",
+                    "@PostMapping(\"/edit\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:checkMenuNameUnique": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "checkMenuNameUnique",
+            "code_snippet": "@Override\n    public boolean checkMenuNameUnique(SysMenu menu)\n    {\n        Long menuId = StringUtils.isNull(menu.getMenuId()) ? -1L : menu.getMenuId();\n        SysMenu info = menuMapper.checkMenuNameUnique(menu.getMenuName(), menu.getParentId());\n        if (StringUtils.isNotNull(info) && info.getMenuId().longValue() != menuId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+            "call_chain_down": [
+                "StringUtils.java:isNull",
+                "SysMenu.java:getMenuId",
+                "SysMenu.java:getMenuName",
+                "SysMenu.java:getParentId",
+                "SysMenu.java:getMenuId"
+            ],
+            "call_chain_code_down": [
+                "    public static boolean isNull(Object object)\n    {\n        return object == null;\n    }\n",
+                "    public Long getMenuId()\n    {\n        return menuId;\n    }\n",
+                "    public String getMenuName()\n    {\n        return menuName;\n    }\n",
+                "    public Long getParentId()\n    {\n        return parentId;\n    }\n",
+                "    public Long getMenuId()\n    {\n        return menuId;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                [],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:addSave",
+                "SysMenuController.java:editSave",
+                "SysMenuController.java:checkMenuNameUnique"
+            ],
+            "call_chain_code_up": [
+                "@Log(title = \"菜单管理\", businessType = BusinessType.INSERT)\n@RequiresPermissions(\"system:menu:add\")\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysMenu menu)\n    {\n        if (!menuService.checkMenuNameUnique(menu))\n        {\n            return error(\"新增菜单'\" + menu.getMenuName() + \"'失败，菜单名称已存在\");\n        }\n        menu.setCreateBy(getLoginName());\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.insertMenu(menu));\n    }\n",
+                "@Log(title = \"菜单管理\", businessType = BusinessType.UPDATE)\n@RequiresPermissions(\"system:menu:edit\")\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysMenu menu)\n    {\n        if (!menuService.checkMenuNameUnique(menu))\n        {\n            return error(\"修改菜单'\" + menu.getMenuName() + \"'失败，菜单名称已存在\");\n        }\n        menu.setUpdateBy(getLoginName());\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(menuService.updateMenu(menu));\n    }\n",
+                "@PostMapping(\"/checkMenuNameUnique\")\n@ResponseBody\n    public boolean checkMenuNameUnique(SysMenu menu)\n    {\n        return menuService.checkMenuNameUnique(menu);\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.INSERT)",
+                    "@RequiresPermissions(\"system:menu:add\")",
+                    "@PostMapping(\"/add\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@Log(title = \"菜单管理\", businessType = BusinessType.UPDATE)",
+                    "@RequiresPermissions(\"system:menu:edit\")",
+                    "@PostMapping(\"/edit\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@PostMapping(\"/checkMenuNameUnique\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:getChildPerms": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "getChildPerms",
+            "code_snippet": "    public List<SysMenu> getChildPerms(List<SysMenu> list, int parentId)\n    {\n        List<SysMenu> returnList = new ArrayList<SysMenu>();\n        for (Iterator<SysMenu> iterator = list.iterator(); iterator.hasNext();)\n        {\n            SysMenu t = (SysMenu) iterator.next();\n            // 一、根据传入的某个父节点ID,遍历该父节点的所有子节点\n            if (t.getParentId() == parentId)\n            {\n                recursionFn(list, t);\n                returnList.add(t);\n            }\n        }\n        return returnList;\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuServiceImpl.java:selectMenusByUser"
+            ],
+            "call_chain_code_up": [
+                "@Override\n    public List<SysMenu> selectMenusByUser(SysUser user)\n    {\n        List<SysMenu> menus = new LinkedList<SysMenu>();\n        // 管理员显示所有菜单信息\n        if (user.isAdmin())\n        {\n            menus = menuMapper.selectMenuNormalAll();\n        }\n        else\n        {\n            menus = menuMapper.selectMenusByUserId(user.getUserId());\n        }\n        return getChildPerms(menus, 0);\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Override"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:recursionFn": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "recursionFn",
+            "code_snippet": "    private void recursionFn(List<SysMenu> list, SysMenu t)\n    {\n        // 得到子节点列表\n        List<SysMenu> childList = getChildList(list, t);\n        t.setChildren(childList);\n        for (SysMenu tChild : childList)\n        {\n            if (hasChild(list, tChild))\n            {\n                recursionFn(list, tChild);\n            }\n        }\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuServiceImpl.java:getChildPerms",
+                "SysMenuServiceImpl.java:recursionFn"
+            ],
+            "call_chain_code_up": [
+                "    public List<SysMenu> getChildPerms(List<SysMenu> list, int parentId)\n    {\n        List<SysMenu> returnList = new ArrayList<SysMenu>();\n        for (Iterator<SysMenu> iterator = list.iterator(); iterator.hasNext();)\n        {\n            SysMenu t = (SysMenu) iterator.next();\n            // 一、根据传入的某个父节点ID,遍历该父节点的所有子节点\n            if (t.getParentId() == parentId)\n            {\n                recursionFn(list, t);\n                returnList.add(t);\n            }\n        }\n        return returnList;\n    }\n",
+                "    private void recursionFn(List<SysMenu> list, SysMenu t)\n    {\n        // 得到子节点列表\n        List<SysMenu> childList = getChildList(list, t);\n        t.setChildren(childList);\n        for (SysMenu tChild : childList)\n        {\n            if (hasChild(list, tChild))\n            {\n                recursionFn(list, tChild);\n            }\n        }\n    }\n"
+            ],
+            "annotation_up": [
+                [],
+                []
+            ]
+        },
+        "SysMenuServiceImpl.java:getChildList": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "getChildList",
+            "code_snippet": "    private List<SysMenu> getChildList(List<SysMenu> list, SysMenu t)\n    {\n        List<SysMenu> tlist = new ArrayList<SysMenu>();\n        Iterator<SysMenu> it = list.iterator();\n        while (it.hasNext())\n        {\n            SysMenu n = (SysMenu) it.next();\n            if (n.getParentId().longValue() == t.getMenuId().longValue())\n            {\n                tlist.add(n);\n            }\n        }\n        return tlist;\n    }\n",
+            "call_chain_down": [
+                "SysMenu.java:getMenuId"
+            ],
+            "call_chain_code_down": [
+                "    public Long getMenuId()\n    {\n        return menuId;\n    }\n"
+            ],
+            "annotation_down": [
+                [],
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuServiceImpl.java:recursionFn",
+                "SysMenuServiceImpl.java:hasChild"
+            ],
+            "call_chain_code_up": [
+                "    private void recursionFn(List<SysMenu> list, SysMenu t)\n    {\n        // 得到子节点列表\n        List<SysMenu> childList = getChildList(list, t);\n        t.setChildren(childList);\n        for (SysMenu tChild : childList)\n        {\n            if (hasChild(list, tChild))\n            {\n                recursionFn(list, tChild);\n            }\n        }\n    }\n",
+                "    private boolean hasChild(List<SysMenu> list, SysMenu t)\n    {\n        return getChildList(list, t).size() > 0;\n    }\n"
+            ],
+            "annotation_up": [
+                [],
+                []
+            ]
+        },
+        "SysMenuServiceImpl.java:hasChild": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "hasChild",
+            "code_snippet": "    private boolean hasChild(List<SysMenu> list, SysMenu t)\n    {\n        return getChildList(list, t).size() > 0;\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuServiceImpl.java:recursionFn"
+            ],
+            "call_chain_code_up": [
+                "    private void recursionFn(List<SysMenu> list, SysMenu t)\n    {\n        // 得到子节点列表\n        List<SysMenu> childList = getChildList(list, t);\n        t.setChildren(childList);\n        for (SysMenu tChild : childList)\n        {\n            if (hasChild(list, tChild))\n            {\n                recursionFn(list, tChild);\n            }\n        }\n    }\n"
+            ],
+            "annotation_up": [
+                []
+            ]
+        },
+        "SysMenuServiceImpl.java:roleMenuTreeData": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "roleMenuTreeData",
+            "code_snippet": "@Override\n    public List<Ztree> roleMenuTreeData(SysRole role, Long userId)\n    {\n        Long roleId = role.getRoleId();\n        List<Ztree> ztrees = new ArrayList<Ztree>();\n        List<SysMenu> menuList = selectMenuAll(userId);\n        if (StringUtils.isNotNull(roleId))\n        {\n            List<String> roleMenuList = menuMapper.selectMenuTree(roleId);\n            ztrees = initZtree(menuList, roleMenuList, true);\n        }\n        else\n        {\n            ztrees = initZtree(menuList, null, true);\n        }\n        return ztrees;\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysMenuController.java:roleMenuTreeData"
+            ],
+            "call_chain_code_up": [
+                "@GetMapping(\"/roleMenuTreeData\")\n@ResponseBody\n    public List<Ztree> roleMenuTreeData(SysRole role)\n    {\n        Long userId = ShiroUtils.getUserId();\n        List<Ztree> ztrees = menuService.roleMenuTreeData(role, userId);\n        return ztrees;\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@GetMapping(\"/roleMenuTreeData\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysMenuServiceImpl.java:initZtree": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysMenuServiceImpl.java",
+            "function_name": "initZtree",
+            "code_snippet": "    public List<Ztree> initZtree(List<SysMenu> menuList)\n    {\n        return initZtree(menuList, null, false);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                []
+            ],
+            "call_chain_up": [
+                "SysMenuServiceImpl.java:menuTreeData"
+            ],
+            "call_chain_code_up": [
+                "@Override\n    public List<Ztree> menuTreeData(Long userId)\n    {\n        List<SysMenu> menuList = selectMenuAll(userId);\n        List<Ztree> ztrees = initZtree(menuList);\n        return ztrees;\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Override"
+                ]
+            ]
+        }
+    },
+    "SysPost": {
+        "SysPostController.java:operlog": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "operlog",
+            "code_snippet": "@RequiresPermissions(\"system:post:view\")\n@GetMapping()\n    public String operlog()\n    {\n        return prefix + \"/post\";\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:post:view\")",
+                    "@GetMapping()"
+                ]
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:list": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "list",
+            "code_snippet": "@RequiresPermissions(\"system:post:list\")\n@PostMapping(\"/list\")\n@ResponseBody\n    public TableDataInfo list(SysPost post)\n    {\n        startPage();\n        List<SysPost> list = postService.selectPostList(post);\n        return getDataTable(list);\n    }\n",
+            "call_chain_down": [
+                "BaseController.java:getDataTable",
+                "SysPostServiceImpl.java:selectPostList"
+            ],
+            "call_chain_code_down": [
+                "@SuppressWarnings({ \"rawtypes\", \"unchecked\" })\n    protected TableDataInfo getDataTable(List<?> list)\n    {\n        TableDataInfo rspData = new TableDataInfo();\n        rspData.setCode(0);\n        rspData.setRows(list);\n        rspData.setTotal(new PageInfo(list).getTotal());\n        return rspData;\n    }\n",
+                "    public List<SysPost> selectPostList(SysPost post)\n    {\n        return postMapper.selectPostList(post);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:post:list\")",
+                    "@PostMapping(\"/list\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@SuppressWarnings({ \"rawtypes\", \"unchecked\" })"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:export": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "export",
+            "code_snippet": "@Log(title = \"岗位管理\", businessType = BusinessType.EXPORT)\n@RequiresPermissions(\"system:post:export\")\n@PostMapping(\"/export\")\n@ResponseBody\n    public AjaxResult export(SysPost post)\n    {\n        List<SysPost> list = postService.selectPostList(post);\n        ExcelUtil<SysPost> util = new ExcelUtil<SysPost>(SysPost.class);\n        return util.exportExcel(list, \"岗位数据\");\n    }\n",
+            "call_chain_down": [
+                "SysPostServiceImpl.java:selectPostList",
+                "ExcelUtil.java:exportExcel"
+            ],
+            "call_chain_code_down": [
+                "    public List<SysPost> selectPostList(SysPost post)\n    {\n        return postMapper.selectPostList(post);\n    }\n",
+                "    public AjaxResult exportExcel(List<T> list, String sheetName)\n    {\n        return exportExcel(list, sheetName, StringUtils.EMPTY);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.EXPORT)",
+                    "@RequiresPermissions(\"system:post:export\")",
+                    "@PostMapping(\"/export\")",
+                    "@ResponseBody"
+                ],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:remove": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "remove",
+            "code_snippet": "@RequiresPermissions(\"system:post:remove\")\n@Log(title = \"岗位管理\", businessType = BusinessType.DELETE)\n@PostMapping(\"/remove\")\n@ResponseBody\n    public AjaxResult remove(String ids)\n    {\n        try\n        {\n            return toAjax(postService.deletePostByIds(ids));\n        }\n        catch (Exception e)\n        {\n            return error(e.getMessage());\n        }\n    }\n",
+            "call_chain_down": [
+                "BaseController.java:toAjax",
+                "SysPostServiceImpl.java:deletePostByIds"
+            ],
+            "call_chain_code_down": [
+                "    protected AjaxResult toAjax(int rows)\n    {\n        return rows > 0 ? success() : error();\n    }\n",
+                "    public int deletePostByIds(String ids)\n    {\n        Long[] postIds = Convert.toLongArray(ids);\n        for (Long postId : postIds)\n        {\n            SysPost post = selectPostById(postId);\n            if (countUserPostById(postId) > 0)\n            {\n                throw new ServiceException(String.format(\"%1$s已分配,不能删除\", post.getPostName()));\n            }\n        }\n        return postMapper.deletePostByIds(postIds);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:post:remove\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.DELETE)",
+                    "@PostMapping(\"/remove\")",
+                    "@ResponseBody"
+                ],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:addSave": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "addSave",
+            "code_snippet": "@RequiresPermissions(\"system:post:add\")\n@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setCreateBy(getLoginName());\n        return toAjax(postService.insertPost(post));\n    }\n",
+            "call_chain_down": [
+                "BaseController.java:toAjax",
+                "SysPostServiceImpl.java:checkPostNameUnique",
+                "SysPost.java:getPostName",
+                "SysPostServiceImpl.java:checkPostCodeUnique",
+                "BaseEntity.java:setCreateBy",
+                "SysPostServiceImpl.java:insertPost"
+            ],
+            "call_chain_code_down": [
+                "    protected AjaxResult toAjax(int rows)\n    {\n        return rows > 0 ? success() : error();\n    }\n",
+                "    public boolean checkPostNameUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostNameUnique(post.getPostName());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+                "    public String getPostName()\n    {\n        return postName;\n    }\n",
+                "    public boolean checkPostCodeUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostCodeUnique(post.getPostCode());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+                "    public void setCreateBy(String createBy)\n    {\n        this.createBy = createBy;\n    }\n",
+                "    public int insertPost(SysPost post)\n    {\n        return postMapper.insertPost(post);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:post:add\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)",
+                    "@PostMapping(\"/add\")",
+                    "@ResponseBody"
+                ],
+                [],
+                [],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:edit": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "edit",
+            "code_snippet": "@RequiresPermissions(\"system:post:edit\")\n@GetMapping(\"/edit/{postId}\")\n    public String edit(@PathVariable(\"postId\") Long postId, ModelMap mmap)\n    {\n        mmap.put(\"post\", postService.selectPostById(postId));\n        return prefix + \"/edit\";\n    }\n",
+            "call_chain_down": [
+                "SysPostServiceImpl.java:selectPostById"
+            ],
+            "call_chain_code_down": [
+                "    public SysPost selectPostById(Long postId)\n    {\n        return postMapper.selectPostById(postId);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:post:edit\")",
+                    "@GetMapping(\"/edit/{postId}\")"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:editSave": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "editSave",
+            "code_snippet": "@RequiresPermissions(\"system:post:edit\")\n@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setUpdateBy(getLoginName());\n        return toAjax(postService.updatePost(post));\n    }\n",
+            "call_chain_down": [
+                "BaseController.java:toAjax",
+                "SysPostServiceImpl.java:checkPostNameUnique",
+                "SysPost.java:getPostName",
+                "SysPostServiceImpl.java:checkPostCodeUnique",
+                "BaseEntity.java:setUpdateBy",
+                "SysPostServiceImpl.java:updatePost"
+            ],
+            "call_chain_code_down": [
+                "    protected AjaxResult toAjax(int rows)\n    {\n        return rows > 0 ? success() : error();\n    }\n",
+                "    public boolean checkPostNameUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostNameUnique(post.getPostName());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+                "    public String getPostName()\n    {\n        return postName;\n    }\n",
+                "    public boolean checkPostCodeUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostCodeUnique(post.getPostCode());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+                "    public void setUpdateBy(String updateBy)\n    {\n        this.updateBy = updateBy;\n    }\n",
+                "    public int updatePost(SysPost post)\n    {\n        return postMapper.updatePost(post);\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:post:edit\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)",
+                    "@PostMapping(\"/edit\")",
+                    "@ResponseBody"
+                ],
+                [],
+                [],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:checkPostNameUnique": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "checkPostNameUnique",
+            "code_snippet": "@PostMapping(\"/checkPostNameUnique\")\n@ResponseBody\n    public boolean checkPostNameUnique(SysPost post)\n    {\n        return postService.checkPostNameUnique(post);\n    }\n",
+            "call_chain_down": [
+                "SysPostServiceImpl.java:checkPostNameUnique"
+            ],
+            "call_chain_code_down": [
+                "    public boolean checkPostNameUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostNameUnique(post.getPostName());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@PostMapping(\"/checkPostNameUnique\")",
+                    "@ResponseBody"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:checkPostCodeUnique": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "checkPostCodeUnique",
+            "code_snippet": "@PostMapping(\"/checkPostCodeUnique\")\n@ResponseBody\n    public boolean checkPostCodeUnique(SysPost post)\n    {\n        return postService.checkPostCodeUnique(post);\n    }\n",
+            "call_chain_down": [
+                "SysPostServiceImpl.java:checkPostCodeUnique"
+            ],
+            "call_chain_code_down": [
+                "    public boolean checkPostCodeUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostCodeUnique(post.getPostCode());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@PostMapping(\"/checkPostCodeUnique\")",
+                    "@ResponseBody"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostController.java:add": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysPostController.java",
+            "function_name": "add",
+            "code_snippet": "@GetMapping(\"/add\")\n    public String add()\n    {\n        return prefix + \"/add\";\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@GetMapping(\"/add\")"
+                ]
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysUserController.java:add": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysUserController.java",
+            "function_name": "add",
+            "code_snippet": "@GetMapping(\"/add\")\n    public String add(ModelMap mmap)\n    {\n        mmap.put(\"roles\", roleService.selectRoleAll().stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));\n        mmap.put(\"posts\", postService.selectPostAll());\n        return prefix + \"/add\";\n    }\n",
+            "call_chain_down": [
+                "SysPostServiceImpl.java:selectPostAll"
+            ],
+            "call_chain_code_down": [
+                "    public List<SysPost> selectPostAll()\n    {\n        return postMapper.selectPostAll();\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@GetMapping(\"/add\")"
+                ],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysUserController.java:edit": {
+            "full_path": "RuoYi_case/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysUserController.java",
+            "function_name": "edit",
+            "code_snippet": "@RequiresPermissions(\"system:user:edit\")\n@GetMapping(\"/edit/{userId}\")\n    public String edit(@PathVariable(\"userId\") Long userId, ModelMap mmap)\n    {\n        userService.checkUserDataScope(userId);\n        List<SysRole> roles = roleService.selectRolesByUserId(userId);\n        mmap.put(\"user\", userService.selectUserById(userId));\n        mmap.put(\"roles\", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));\n        mmap.put(\"posts\", postService.selectPostsByUserId(userId));\n        return prefix + \"/edit\";\n    }\n",
+            "call_chain_down": [
+                "SysUserServiceImpl.java:checkUserDataScope",
+                "SysRoleServiceImpl.java:selectRolesByUserId",
+                "SysUserServiceImpl.java:selectUserById",
+                "SysUser.java:isAdmin",
+                "SysPostServiceImpl.java:selectPostsByUserId"
+            ],
+            "call_chain_code_down": [
+                "    public void checkUserDataScope(Long userId)\n    {\n        if (!SysUser.isAdmin(ShiroUtils.getUserId()))\n        {\n            SysUser user = new SysUser();\n            user.setUserId(userId);\n            List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n            if (StringUtils.isEmpty(users))\n            {\n                throw new ServiceException(\"没有权限访问用户数据！\");\n            }\n        }\n    }\n",
+                "    public List<SysRole> selectRolesByUserId(Long userId)\n    {\n        List<SysRole> userRoles = roleMapper.selectRolesByUserId(userId);\n        List<SysRole> roles = selectRoleAll();\n        for (SysRole role : roles)\n        {\n            for (SysRole userRole : userRoles)\n            {\n                if (role.getRoleId().longValue() == userRole.getRoleId().longValue())\n                {\n                    role.setFlag(true);\n                    break;\n                }\n            }\n        }\n        return roles;\n    }\n",
+                "    public SysUser selectUserById(Long userId)\n    {\n        return userMapper.selectUserById(userId);\n    }\n",
+                "    public boolean isAdmin()\n    {\n        return isAdmin(this.userId);\n    }\n",
+                "    public List<SysPost> selectPostsByUserId(Long userId)\n    {\n        List<SysPost> userPosts = postMapper.selectPostsByUserId(userId);\n        List<SysPost> posts = postMapper.selectPostAll();\n        for (SysPost post : posts)\n        {\n            for (SysPost userRole : userPosts)\n            {\n                if (post.getPostId().longValue() == userRole.getPostId().longValue())\n                {\n                    post.setFlag(true);\n                    break;\n                }\n            }\n        }\n        return posts;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@RequiresPermissions(\"system:user:edit\")",
+                    "@GetMapping(\"/edit/{userId}\")"
+                ],
+                [],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [],
+            "call_chain_code_up": [],
+            "annotation_up": []
+        },
+        "SysPostServiceImpl.java:selectPostList": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "selectPostList",
+            "code_snippet": "@Override\n    public List<SysPost> selectPostList(SysPost post)\n    {\n        return postMapper.selectPostList(post);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysPostController.java:list",
+                "SysPostController.java:export"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:post:list\")\n@PostMapping(\"/list\")\n@ResponseBody\n    public TableDataInfo list(SysPost post)\n    {\n        startPage();\n        List<SysPost> list = postService.selectPostList(post);\n        return getDataTable(list);\n    }\n",
+                "@Log(title = \"岗位管理\", businessType = BusinessType.EXPORT)\n@RequiresPermissions(\"system:post:export\")\n@PostMapping(\"/export\")\n@ResponseBody\n    public AjaxResult export(SysPost post)\n    {\n        List<SysPost> list = postService.selectPostList(post);\n        ExcelUtil<SysPost> util = new ExcelUtil<SysPost>(SysPost.class);\n        return util.exportExcel(list, \"岗位数据\");\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:post:list\")",
+                    "@PostMapping(\"/list\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.EXPORT)",
+                    "@RequiresPermissions(\"system:post:export\")",
+                    "@PostMapping(\"/export\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:selectPostAll": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "selectPostAll",
+            "code_snippet": "@Override\n    public List<SysPost> selectPostAll()\n    {\n        return postMapper.selectPostAll();\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysUserController.java:add"
+            ],
+            "call_chain_code_up": [
+                "@GetMapping(\"/add\")\n    public String add(ModelMap mmap)\n    {\n        mmap.put(\"roles\", roleService.selectRoleAll().stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));\n        mmap.put(\"posts\", postService.selectPostAll());\n        return prefix + \"/add\";\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@GetMapping(\"/add\")"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:selectPostsByUserId": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "selectPostsByUserId",
+            "code_snippet": "@Override\n    public List<SysPost> selectPostsByUserId(Long userId)\n    {\n        List<SysPost> userPosts = postMapper.selectPostsByUserId(userId);\n        List<SysPost> posts = postMapper.selectPostAll();\n        for (SysPost post : posts)\n        {\n            for (SysPost userRole : userPosts)\n            {\n                if (post.getPostId().longValue() == userRole.getPostId().longValue())\n                {\n                    post.setFlag(true);\n                    break;\n                }\n            }\n        }\n        return posts;\n    }\n",
+            "call_chain_down": [
+                "SysPost.java:getPostId",
+                "SysPost.java:getPostId",
+                "SysPost.java:setFlag"
+            ],
+            "call_chain_code_down": [
+                "    public Long getPostId()\n    {\n        return postId;\n    }\n",
+                "    public Long getPostId()\n    {\n        return postId;\n    }\n",
+                "    public void setFlag(boolean flag)\n    {\n        this.flag = flag;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [
+                "SysUserController.java:edit"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:user:edit\")\n@GetMapping(\"/edit/{userId}\")\n    public String edit(@PathVariable(\"userId\") Long userId, ModelMap mmap)\n    {\n        userService.checkUserDataScope(userId);\n        List<SysRole> roles = roleService.selectRolesByUserId(userId);\n        mmap.put(\"user\", userService.selectUserById(userId));\n        mmap.put(\"roles\", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));\n        mmap.put(\"posts\", postService.selectPostsByUserId(userId));\n        return prefix + \"/edit\";\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:user:edit\")",
+                    "@GetMapping(\"/edit/{userId}\")"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:selectPostById": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "selectPostById",
+            "code_snippet": "@Override\n    public SysPost selectPostById(Long postId)\n    {\n        return postMapper.selectPostById(postId);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysPostController.java:edit",
+                "SysPostServiceImpl.java:deletePostByIds"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:post:edit\")\n@GetMapping(\"/edit/{postId}\")\n    public String edit(@PathVariable(\"postId\") Long postId, ModelMap mmap)\n    {\n        mmap.put(\"post\", postService.selectPostById(postId));\n        return prefix + \"/edit\";\n    }\n",
+                "@Override\n    public int deletePostByIds(String ids)\n    {\n        Long[] postIds = Convert.toLongArray(ids);\n        for (Long postId : postIds)\n        {\n            SysPost post = selectPostById(postId);\n            if (countUserPostById(postId) > 0)\n            {\n                throw new ServiceException(String.format(\"%1$s已分配,不能删除\", post.getPostName()));\n            }\n        }\n        return postMapper.deletePostByIds(postIds);\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:post:edit\")",
+                    "@GetMapping(\"/edit/{postId}\")"
+                ],
+                [
+                    "@Override"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:deletePostByIds": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "deletePostByIds",
+            "code_snippet": "@Override\n    public int deletePostByIds(String ids)\n    {\n        Long[] postIds = Convert.toLongArray(ids);\n        for (Long postId : postIds)\n        {\n            SysPost post = selectPostById(postId);\n            if (countUserPostById(postId) > 0)\n            {\n                throw new ServiceException(String.format(\"%1$s已分配,不能删除\", post.getPostName()));\n            }\n        }\n        return postMapper.deletePostByIds(postIds);\n    }\n",
+            "call_chain_down": [
+                "Convert.java:toLongArray",
+                "SysPost.java:getPostName"
+            ],
+            "call_chain_code_down": [
+                "    public static Long[] toLongArray(String str)\n    {\n        return toLongArray(\",\", str);\n    }\n",
+                "    public String getPostName()\n    {\n        return postName;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                [],
+                []
+            ],
+            "call_chain_up": [
+                "SysPostController.java:remove"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:post:remove\")\n@Log(title = \"岗位管理\", businessType = BusinessType.DELETE)\n@PostMapping(\"/remove\")\n@ResponseBody\n    public AjaxResult remove(String ids)\n    {\n        try\n        {\n            return toAjax(postService.deletePostByIds(ids));\n        }\n        catch (Exception e)\n        {\n            return error(e.getMessage());\n        }\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:post:remove\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.DELETE)",
+                    "@PostMapping(\"/remove\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:insertPost": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "insertPost",
+            "code_snippet": "@Override\n    public int insertPost(SysPost post)\n    {\n        return postMapper.insertPost(post);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysPostController.java:addSave"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:post:add\")\n@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setCreateBy(getLoginName());\n        return toAjax(postService.insertPost(post));\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:post:add\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)",
+                    "@PostMapping(\"/add\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:updatePost": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "updatePost",
+            "code_snippet": "@Override\n    public int updatePost(SysPost post)\n    {\n        return postMapper.updatePost(post);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysPostController.java:editSave"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:post:edit\")\n@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setUpdateBy(getLoginName());\n        return toAjax(postService.updatePost(post));\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:post:edit\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)",
+                    "@PostMapping(\"/edit\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:countUserPostById": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "countUserPostById",
+            "code_snippet": "@Override\n    public int countUserPostById(Long postId)\n    {\n        return userPostMapper.countUserPostById(postId);\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysPostServiceImpl.java:deletePostByIds"
+            ],
+            "call_chain_code_up": [
+                "@Override\n    public int deletePostByIds(String ids)\n    {\n        Long[] postIds = Convert.toLongArray(ids);\n        for (Long postId : postIds)\n        {\n            SysPost post = selectPostById(postId);\n            if (countUserPostById(postId) > 0)\n            {\n                throw new ServiceException(String.format(\"%1$s已分配,不能删除\", post.getPostName()));\n            }\n        }\n        return postMapper.deletePostByIds(postIds);\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@Override"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:checkPostNameUnique": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "checkPostNameUnique",
+            "code_snippet": "@Override\n    public boolean checkPostNameUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostNameUnique(post.getPostName());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+            "call_chain_down": [
+                "StringUtils.java:isNull",
+                "SysPost.java:getPostId",
+                "SysPost.java:getPostName",
+                "SysPost.java:getPostId"
+            ],
+            "call_chain_code_down": [
+                "    public static boolean isNull(Object object)\n    {\n        return object == null;\n    }\n",
+                "    public Long getPostId()\n    {\n        return postId;\n    }\n",
+                "    public String getPostName()\n    {\n        return postName;\n    }\n",
+                "    public Long getPostId()\n    {\n        return postId;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [
+                "SysPostController.java:addSave",
+                "SysPostController.java:editSave",
+                "SysPostController.java:checkPostNameUnique"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:post:add\")\n@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setCreateBy(getLoginName());\n        return toAjax(postService.insertPost(post));\n    }\n",
+                "@RequiresPermissions(\"system:post:edit\")\n@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setUpdateBy(getLoginName());\n        return toAjax(postService.updatePost(post));\n    }\n",
+                "@PostMapping(\"/checkPostNameUnique\")\n@ResponseBody\n    public boolean checkPostNameUnique(SysPost post)\n    {\n        return postService.checkPostNameUnique(post);\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:post:add\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)",
+                    "@PostMapping(\"/add\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@RequiresPermissions(\"system:post:edit\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)",
+                    "@PostMapping(\"/edit\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@PostMapping(\"/checkPostNameUnique\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysPostServiceImpl.java:checkPostCodeUnique": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysPostServiceImpl.java",
+            "function_name": "checkPostCodeUnique",
+            "code_snippet": "@Override\n    public boolean checkPostCodeUnique(SysPost post)\n    {\n        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();\n        SysPost info = postMapper.checkPostCodeUnique(post.getPostCode());\n        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())\n        {\n            return UserConstants.NOT_UNIQUE;\n        }\n        return UserConstants.UNIQUE;\n    }\n",
+            "call_chain_down": [
+                "StringUtils.java:isNull",
+                "SysPost.java:getPostId",
+                "SysPost.java:getPostCode",
+                "SysPost.java:getPostId"
+            ],
+            "call_chain_code_down": [
+                "    public static boolean isNull(Object object)\n    {\n        return object == null;\n    }\n",
+                "    public Long getPostId()\n    {\n        return postId;\n    }\n",
+                "    public String getPostCode()\n    {\n        return postCode;\n    }\n",
+                "    public Long getPostId()\n    {\n        return postId;\n    }\n"
+            ],
+            "annotation_down": [
+                [
+                    "@Override"
+                ],
+                [],
+                [],
+                [],
+                []
+            ],
+            "call_chain_up": [
+                "SysPostController.java:addSave",
+                "SysPostController.java:editSave",
+                "SysPostController.java:checkPostCodeUnique"
+            ],
+            "call_chain_code_up": [
+                "@RequiresPermissions(\"system:post:add\")\n@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"新增岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setCreateBy(getLoginName());\n        return toAjax(postService.insertPost(post));\n    }\n",
+                "@RequiresPermissions(\"system:post:edit\")\n@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysPost post)\n    {\n        if (!postService.checkPostNameUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位名称已存在\");\n        }\n        else if (!postService.checkPostCodeUnique(post))\n        {\n            return error(\"修改岗位'\" + post.getPostName() + \"'失败，岗位编码已存在\");\n        }\n        post.setUpdateBy(getLoginName());\n        return toAjax(postService.updatePost(post));\n    }\n",
+                "@PostMapping(\"/checkPostCodeUnique\")\n@ResponseBody\n    public boolean checkPostCodeUnique(SysPost post)\n    {\n        return postService.checkPostCodeUnique(post);\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@RequiresPermissions(\"system:post:add\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.INSERT)",
+                    "@PostMapping(\"/add\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@RequiresPermissions(\"system:post:edit\")",
+                    "@Log(title = \"岗位管理\", businessType = BusinessType.UPDATE)",
+                    "@PostMapping(\"/edit\")",
+                    "@ResponseBody"
+                ],
+                [
+                    "@PostMapping(\"/checkPostCodeUnique\")",
+                    "@ResponseBody"
+                ]
+            ]
+        },
+        "SysUserServiceImpl.java:selectUserPostGroup": {
+            "full_path": "RuoYi_case/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java",
+            "function_name": "selectUserPostGroup",
+            "code_snippet": "@Override\n    public String selectUserPostGroup(Long userId)\n    {\n        List<SysPost> list = postMapper.selectPostsByUserId(userId);\n        if (CollectionUtils.isEmpty(list))\n        {\n            return StringUtils.EMPTY;\n        }\n        return list.stream().map(SysPost::getPostName).collect(Collectors.joining(\",\"));\n    }\n",
+            "call_chain_down": [],
+            "call_chain_code_down": [],
+            "annotation_down": [
+                [
+                    "@Override"
+                ]
+            ],
+            "call_chain_up": [
+                "SysProfileController.java:profile",
+                "SysUserController.java:view"
+            ],
+            "call_chain_code_up": [
+                "@GetMapping()\n    public String profile(ModelMap mmap)\n    {\n        SysUser user = getSysUser();\n        mmap.put(\"user\", user);\n        mmap.put(\"roleGroup\", userService.selectUserRoleGroup(user.getUserId()));\n        mmap.put(\"postGroup\", userService.selectUserPostGroup(user.getUserId()));\n        return prefix + \"/profile\";\n    }\n",
+                "@RequiresPermissions(\"system:user:list\")\n@GetMapping(\"/view/{userId}\")\n    public String view(@PathVariable(\"userId\") Long userId, ModelMap mmap)\n    {\n        userService.checkUserDataScope(userId);\n        mmap.put(\"user\", userService.selectUserById(userId));\n        mmap.put(\"roleGroup\", userService.selectUserRoleGroup(userId));\n        mmap.put(\"postGroup\", userService.selectUserPostGroup(userId));\n        return prefix + \"/view\";\n    }\n"
+            ],
+            "annotation_up": [
+                [
+                    "@GetMapping()"
+                ],
+                [
+                    "@RequiresPermissions(\"system:user:list\")",
+                    "@GetMapping(\"/view/{userId}\")"
+                ]
+            ]
+        }
+    }
+}

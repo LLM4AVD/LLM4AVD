@@ -1,0 +1,177 @@
+[
+    {
+        "layer0": {
+            "resource": "SysUser",
+            "file_path": "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysUserController.java",
+            "func_name": "importData",
+            "code": "    public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception\n    {\n        ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);\n        List<SysUser> userList = util.importExcel(file.getInputStream());\n        String message = userService.importUser(userList, updateSupport, getLoginName());\n        return AjaxResult.success(message);\n    }\n",
+            "annotation": [
+                "@Log(title = \"用户管理\", businessType = BusinessType.IMPORT)",
+                "@RequiresPermissions(\"system:user:import\")",
+                "@PostMapping(\"/importData\")",
+                "@ResponseBody"
+            ]
+        },
+        "layer1_down": {
+            "importData": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/poi/ExcelUtil.java:importExcel",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:importUser"
+                    ],
+                    [
+                        "    public List<T> importExcel(InputStream is)\n    {\n        return importExcel(is, 0);\n    }\n",
+                        "    public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName)\n    {\n        if (StringUtils.isNull(userList) || userList.size() == 0)\n        {\n            throw new ServiceException(\"导入用户数据不能为空！\");\n        }\n        int successNum = 0;\n        int failureNum = 0;\n        StringBuilder successMsg = new StringBuilder();\n        StringBuilder failureMsg = new StringBuilder();\n        for (SysUser user : userList)\n        {\n            try\n            {\n                // 验证是否存在这个用户\n                SysUser u = userMapper.selectUserByLoginName(user.getLoginName());\n                if (StringUtils.isNull(u))\n                {\n                    BeanValidators.validateWithException(validator, user);\n                    deptService.checkDeptDataScope(user.getDeptId());\n                    String password = configService.selectConfigByKey(\"sys.user.initPassword\");\n                    user.setPassword(Md5Utils.hash(user.getLoginName() + password));\n                    user.setCreateBy(operName);\n                    userMapper.insertUser(user);\n                    successNum++;\n                    successMsg.append(\"<br/>\" + successNum + \"、账号 \" + user.getLoginName() + \" 导入成功\");\n                }\n                else if (isUpdateSupport)\n                {\n                    BeanValidators.validateWithException(validator, user);\n                    checkUserAllowed(u);\n                    checkUserDataScope(u.getUserId());\n                    deptService.checkDeptDataScope(user.getDeptId());\n                    user.setUserId(u.getUserId());\n                    user.setUpdateBy(operName);\n                    userMapper.updateUser(user);\n                    successNum++;\n                    successMsg.append(\"<br/>\" + successNum + \"、账号 \" + user.getLoginName() + \" 更新成功\");\n                }\n                else\n                {\n                    failureNum++;\n                    failureMsg.append(\"<br/>\" + failureNum + \"、账号 \" + user.getLoginName() + \" 已存在\");\n                }\n            }\n            catch (Exception e)\n            {\n                failureNum++;\n                String loginName = user.getLoginName();\n                if (ExceptionUtil.isCausedBy(e, ConstraintViolationException.class))\n                {\n                    loginName = EscapeUtil.clean(loginName);\n                }\n                String msg = \"<br/>\" + failureNum + \"、账号 \" + loginName + \" 导入失败：\";\n                failureMsg.append(msg + e.getMessage());\n                log.error(msg, e);\n            }\n        }\n        if (failureNum > 0)\n        {\n            failureMsg.insert(0, \"很抱歉，导入失败！共 \" + failureNum + \" 条数据格式不正确，错误如下：\");\n            throw new ServiceException(failureMsg.toString());\n        }\n        else\n        {\n            successMsg.insert(0, \"恭喜您，数据已全部导入成功！共 \" + successNum + \" 条，数据如下：\");\n        }\n        return successMsg.toString();\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [],
+                    []
+                ]
+            }
+        },
+        "layer2_down": {
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/poi/ExcelUtil.java:importExcel": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/poi/ExcelUtil.java:importExcel"
+                    ],
+                    [
+                        "    public List<T> importExcel(InputStream is)\n    {\n        return importExcel(is, 0);\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    []
+                ]
+            },
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:importUser": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:checkUserAllowed",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:checkUserDataScope",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/StringUtils.java:isNull",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:getLoginName",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysDeptServiceImpl.java:checkDeptDataScope",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:getDeptId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:setPassword",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/BaseEntity.java:setCreateBy",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:getUserId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:setUserId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/BaseEntity.java:setUpdateBy"
+                    ],
+                    [
+                        "@Override\n    public void checkUserAllowed(SysUser user)\n    {\n        if (StringUtils.isNotNull(user.getUserId()) && user.isAdmin())\n        {\n            throw new ServiceException(\"不允许操作超级管理员用户\");\n        }\n    }\n",
+                        "@Override\n    public void checkUserDataScope(Long userId)\n    {\n        if (!SysUser.isAdmin(ShiroUtils.getUserId()))\n        {\n            SysUser user = new SysUser();\n            user.setUserId(userId);\n            List<SysUser> users = SpringUtils.getAopProxy(this).selectUserList(user);\n            if (StringUtils.isEmpty(users))\n            {\n                throw new ServiceException(\"没有权限访问用户数据！\");\n            }\n        }\n    }\n",
+                        "    public static boolean isNull(Object object)\n    {\n        return object == null;\n    }\n",
+                        "    public String getLoginName()\n    {\n        return loginName;\n    }\n",
+                        "    public void checkDeptDataScope(Long deptId)\n    {\n        if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId))\n        {\n            SysDept dept = new SysDept();\n            dept.setDeptId(deptId);\n            List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);\n            if (StringUtils.isEmpty(depts))\n            {\n                throw new ServiceException(\"没有权限访问部门数据！\");\n            }\n        }\n    }\n",
+                        "    public Long getDeptId()\n    {\n        return deptId;\n    }\n",
+                        "    public void setPassword(String password)\n    {\n        this.password = password;\n    }\n",
+                        "    public void setCreateBy(String createBy)\n    {\n        this.createBy = createBy;\n    }\n",
+                        "    public Long getUserId()\n    {\n        return userId;\n    }\n",
+                        "    public void setUserId(Long userId)\n    {\n        this.userId = userId;\n    }\n",
+                        "    public void setUpdateBy(String updateBy)\n    {\n        this.updateBy = updateBy;\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [
+                        "@Override"
+                    ],
+                    [
+                        "@Override"
+                    ],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    []
+                ]
+            }
+        },
+        "layer3_down": {
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/poi/ExcelUtil.java:importExcel": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/poi/ExcelUtil.java:importExcel"
+                    ],
+                    [
+                        "    public List<T> importExcel(InputStream is)\n    {\n        return importExcel(is, 0);\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    []
+                ]
+            },
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:checkUserAllowed": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/StringUtils.java:isNotNull",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:getUserId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:isAdmin"
+                    ],
+                    [
+                        "    public static boolean isNotNull(Object object)\n    {\n        return !isNull(object);\n    }\n",
+                        "    public Long getUserId()\n    {\n        return userId;\n    }\n",
+                        "    public boolean isAdmin()\n    {\n        return isAdmin(this.userId);\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [],
+                    [],
+                    []
+                ]
+            },
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:checkUserDataScope": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:isAdmin",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/ShiroUtils.java:getUserId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:setUserId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:selectUserList"
+                    ],
+                    [
+                        "    public boolean isAdmin()\n    {\n        return isAdmin(this.userId);\n    }\n",
+                        "    public static Long getUserId()\n    {\n        return getSysUser().getUserId().longValue();\n    }\n",
+                        "    public void setUserId(Long userId)\n    {\n        this.userId = userId;\n    }\n",
+                        "    public List<SysUser> selectUserList(SysUser user)\n    {\n        return userMapper.selectUserList(user);\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [],
+                    [],
+                    [],
+                    []
+                ]
+            },
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysDeptServiceImpl.java:checkDeptDataScope": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysUser.java:isAdmin",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/ShiroUtils.java:getUserId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/StringUtils.java:isNotNull",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysDept.java:setDeptId"
+                    ],
+                    [
+                        "    public boolean isAdmin()\n    {\n        return isAdmin(this.userId);\n    }\n",
+                        "    public static Long getUserId()\n    {\n        return getSysUser().getUserId().longValue();\n    }\n",
+                        "    public static boolean isNotNull(Object object)\n    {\n        return !isNull(object);\n    }\n",
+                        "    public void setDeptId(Long deptId)\n    {\n        this.deptId = deptId;\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [],
+                    [],
+                    [],
+                    []
+                ]
+            }
+        },
+        "layer1_up": {},
+        "layer2_up": {},
+        "layer3_up": {}
+    }
+]

@@ -1,0 +1,126 @@
+[
+    {
+        "layer0": {
+            "resource": "SysDept",
+            "file_path": "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysDeptServiceImpl.java",
+            "func_name": "checkDeptDataScope",
+            "code": "    public void checkDeptDataScope(Long deptId)\n    {\n        if (!SysUser.isAdmin(ShiroUtils.getUserId()) && StringUtils.isNotNull(deptId))\n        {\n            SysDept dept = new SysDept();\n            dept.setDeptId(deptId);\n            List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);\n            if (StringUtils.isEmpty(depts))\n            {\n                throw new ServiceException(\"没有权限访问部门数据！\");\n            }\n        }\n    }\n",
+            "annotation": [
+                "@Override"
+            ]
+        },
+        "layer1_down": {
+            "checkDeptDataScope": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/StringUtils.java:isNotNull",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/core/domain/entity/SysDept.java:setDeptId",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysDeptServiceImpl.java:selectDeptList"
+                    ],
+                    [
+                        "    public static boolean isNotNull(Object object)\n    {\n        return !isNull(object);\n    }\n",
+                        "    public void setDeptId(Long deptId)\n    {\n        this.deptId = deptId;\n    }\n",
+                        "    public List<SysDept> selectDeptList(SysDept dept)\n    {\n        return deptMapper.selectDeptList(dept);\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [],
+                    [],
+                    []
+                ]
+            }
+        },
+        "layer2_down": {
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/StringUtils.java:isNotNull": {
+                "call_chain_down": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-common/src/main/java/com/ruoyi/common/utils/StringUtils.java:isNull"
+                    ],
+                    [
+                        "    public static boolean isNull(Object object)\n    {\n        return object == null;\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    []
+                ]
+            }
+        },
+        "layer3_down": {},
+        "layer1_up": {
+            "checkDeptDataScope": {
+                "call_chain_up": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysDeptController.java:edit",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysDeptController.java:editSave",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysDeptController.java:remove",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysUserController.java:addSave",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysUserController.java:editSave",
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:importUser"
+                    ],
+                    [
+                        "@RequiresPermissions(\"system:dept:edit\")\n@GetMapping(\"/edit/{deptId}\")\n    public String edit(@PathVariable(\"deptId\") Long deptId, ModelMap mmap)\n    {\n        deptService.checkDeptDataScope(deptId);\n        SysDept dept = deptService.selectDeptById(deptId);\n        if (StringUtils.isNotNull(dept) && 100L == deptId)\n        {\n            dept.setParentName(\"无\");\n        }\n        mmap.put(\"dept\", dept);\n        return prefix + \"/edit\";\n    }\n",
+                        "@Log(title = \"部门管理\", businessType = BusinessType.UPDATE)\n@RequiresPermissions(\"system:dept:edit\")\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysDept dept)\n    {\n        Long deptId = dept.getDeptId();\n        deptService.checkDeptDataScope(deptId);\n        if (!deptService.checkDeptNameUnique(dept))\n        {\n            return error(\"修改部门'\" + dept.getDeptName() + \"'失败，部门名称已存在\");\n        }\n        else if (dept.getParentId().equals(deptId))\n        {\n            return error(\"修改部门'\" + dept.getDeptName() + \"'失败，上级部门不能是自己\");\n        }\n        else if (StringUtils.equals(UserConstants.DEPT_DISABLE, dept.getStatus()) && deptService.selectNormalChildrenDeptById(deptId) > 0)\n        {\n            return AjaxResult.error(\"该部门包含未停用的子部门！\");\n        }\n        dept.setUpdateBy(getLoginName());\n        return toAjax(deptService.updateDept(dept));\n    }\n",
+                        "@Log(title = \"部门管理\", businessType = BusinessType.DELETE)\n@RequiresPermissions(\"system:dept:remove\")\n@GetMapping(\"/remove/{deptId}\")\n@ResponseBody\n    public AjaxResult remove(@PathVariable(\"deptId\") Long deptId)\n    {\n        if (deptService.selectDeptCount(deptId) > 0)\n        {\n            return AjaxResult.warn(\"存在下级部门,不允许删除\");\n        }\n        if (deptService.checkDeptExistUser(deptId))\n        {\n            return AjaxResult.warn(\"部门存在用户,不允许删除\");\n        }\n        deptService.checkDeptDataScope(deptId);\n        return toAjax(deptService.deleteDeptById(deptId));\n    }\n",
+                        "@RequiresPermissions(\"system:user:add\")\n@Log(title = \"用户管理\", businessType = BusinessType.INSERT)\n@PostMapping(\"/add\")\n@ResponseBody\n    public AjaxResult addSave(@Validated SysUser user)\n    {\n        deptService.checkDeptDataScope(user.getDeptId());\n        roleService.checkRoleDataScope(user.getRoleIds());\n        if (!userService.checkLoginNameUnique(user))\n        {\n            return error(\"新增用户'\" + user.getLoginName() + \"'失败，登录账号已存在\");\n        }\n        else if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(user))\n        {\n            return error(\"新增用户'\" + user.getLoginName() + \"'失败，手机号码已存在\");\n        }\n        else if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(user))\n        {\n            return error(\"新增用户'\" + user.getLoginName() + \"'失败，邮箱账号已存在\");\n        }\n        user.setSalt(ShiroUtils.randomSalt());\n        user.setPassword(passwordService.encryptPassword(user.getLoginName(), user.getPassword(), user.getSalt()));\n        user.setPwdUpdateDate(DateUtils.getNowDate());\n        user.setCreateBy(getLoginName());\n        return toAjax(userService.insertUser(user));\n    }\n",
+                        "@RequiresPermissions(\"system:user:edit\")\n@Log(title = \"用户管理\", businessType = BusinessType.UPDATE)\n@PostMapping(\"/edit\")\n@ResponseBody\n    public AjaxResult editSave(@Validated SysUser user)\n    {\n        userService.checkUserAllowed(user);\n        userService.checkUserDataScope(user.getUserId());\n        deptService.checkDeptDataScope(user.getDeptId());\n        roleService.checkRoleDataScope(user.getRoleIds());\n        if (!userService.checkLoginNameUnique(user))\n        {\n            return error(\"修改用户'\" + user.getLoginName() + \"'失败，登录账号已存在\");\n        }\n        else if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(user))\n        {\n            return error(\"修改用户'\" + user.getLoginName() + \"'失败，手机号码已存在\");\n        }\n        else if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(user))\n        {\n            return error(\"修改用户'\" + user.getLoginName() + \"'失败，邮箱账号已存在\");\n        }\n        user.setUpdateBy(getLoginName());\n        AuthorizationUtils.clearAllCachedAuthorizationInfo();\n        return toAjax(userService.updateUser(user));\n    }\n",
+                        "@Override\n    public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName)\n    {\n        if (StringUtils.isNull(userList) || userList.size() == 0)\n        {\n            throw new ServiceException(\"导入用户数据不能为空！\");\n        }\n        int successNum = 0;\n        int failureNum = 0;\n        StringBuilder successMsg = new StringBuilder();\n        StringBuilder failureMsg = new StringBuilder();\n        for (SysUser user : userList)\n        {\n            try\n            {\n                // 验证是否存在这个用户\n                SysUser u = userMapper.selectUserByLoginName(user.getLoginName());\n                if (StringUtils.isNull(u))\n                {\n                    BeanValidators.validateWithException(validator, user);\n                    deptService.checkDeptDataScope(user.getDeptId());\n                    String password = configService.selectConfigByKey(\"sys.user.initPassword\");\n                    user.setPassword(Md5Utils.hash(user.getLoginName() + password));\n                    user.setCreateBy(operName);\n                    userMapper.insertUser(user);\n                    successNum++;\n                    successMsg.append(\"<br/>\" + successNum + \"、账号 \" + user.getLoginName() + \" 导入成功\");\n                }\n                else if (isUpdateSupport)\n                {\n                    BeanValidators.validateWithException(validator, user);\n                    checkUserAllowed(u);\n                    checkUserDataScope(u.getUserId());\n                    deptService.checkDeptDataScope(user.getDeptId());\n                    user.setUserId(u.getUserId());\n                    user.setUpdateBy(operName);\n                    userMapper.updateUser(user);\n                    successNum++;\n                    successMsg.append(\"<br/>\" + successNum + \"、账号 \" + user.getLoginName() + \" 更新成功\");\n                }\n                else\n                {\n                    failureNum++;\n                    failureMsg.append(\"<br/>\" + failureNum + \"、账号 \" + user.getLoginName() + \" 已存在\");\n                }\n            }\n            catch (Exception e)\n            {\n                failureNum++;\n                String loginName = user.getLoginName();\n                if (ExceptionUtil.isCausedBy(e, ConstraintViolationException.class))\n                {\n                    loginName = EscapeUtil.clean(loginName);\n                }\n                String msg = \"<br/>\" + failureNum + \"、账号 \" + loginName + \" 导入失败：\";\n                failureMsg.append(msg + e.getMessage());\n                log.error(msg, e);\n            }\n        }\n        if (failureNum > 0)\n        {\n            failureMsg.insert(0, \"很抱歉，导入失败！共 \" + failureNum + \" 条数据格式不正确，错误如下：\");\n            throw new ServiceException(failureMsg.toString());\n        }\n        else\n        {\n            successMsg.insert(0, \"恭喜您，数据已全部导入成功！共 \" + successNum + \" 条，数据如下：\");\n        }\n        return successMsg.toString();\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [
+                        "@RequiresPermissions(\"system:dept:edit\")",
+                        "@GetMapping(\"/edit/{deptId}\")"
+                    ],
+                    [
+                        "@Log(title = \"部门管理\", businessType = BusinessType.UPDATE)",
+                        "@RequiresPermissions(\"system:dept:edit\")",
+                        "@PostMapping(\"/edit\")",
+                        "@ResponseBody"
+                    ],
+                    [
+                        "@Log(title = \"部门管理\", businessType = BusinessType.DELETE)",
+                        "@RequiresPermissions(\"system:dept:remove\")",
+                        "@GetMapping(\"/remove/{deptId}\")",
+                        "@ResponseBody"
+                    ],
+                    [
+                        "@RequiresPermissions(\"system:user:add\")",
+                        "@Log(title = \"用户管理\", businessType = BusinessType.INSERT)",
+                        "@PostMapping(\"/add\")",
+                        "@ResponseBody"
+                    ],
+                    [
+                        "@RequiresPermissions(\"system:user:edit\")",
+                        "@Log(title = \"用户管理\", businessType = BusinessType.UPDATE)",
+                        "@PostMapping(\"/edit\")",
+                        "@ResponseBody"
+                    ],
+                    [
+                        "@Override"
+                    ]
+                ]
+            }
+        },
+        "layer2_up": {
+            "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-system/src/main/java/com/ruoyi/system/service/impl/SysUserServiceImpl.java:importUser": {
+                "call_chain_up": [
+                    [
+                        "/home/fdse/hzc/LLM4VUL/RuoYi/ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/SysUserController.java:importData"
+                    ],
+                    [
+                        "@Log(title = \"用户管理\", businessType = BusinessType.IMPORT)\n@RequiresPermissions(\"system:user:import\")\n@PostMapping(\"/importData\")\n@ResponseBody\n    public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception\n    {\n        ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);\n        List<SysUser> userList = util.importExcel(file.getInputStream());\n        String message = userService.importUser(userList, updateSupport, getLoginName());\n        return AjaxResult.success(message);\n    }\n"
+                    ]
+                ],
+                "annotation": [
+                    [
+                        "@Log(title = \"用户管理\", businessType = BusinessType.IMPORT)",
+                        "@RequiresPermissions(\"system:user:import\")",
+                        "@PostMapping(\"/importData\")",
+                        "@ResponseBody"
+                    ]
+                ]
+            }
+        },
+        "layer3_up": {}
+    }
+]
